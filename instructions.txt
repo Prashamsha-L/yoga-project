@@ -1,0 +1,13 @@
+First step - cd YogaAI
+
+1> For login or signup backend
+-> cd yogaai-backend
+-> node server.js
+
+2> For contact 
+-> cd ../frontend
+-> python app.py 
+
+3> Posture Detection
+-> cd backend
+-> python -m uvicorn main:app --reload --host 0.0.0.0 --port 8002

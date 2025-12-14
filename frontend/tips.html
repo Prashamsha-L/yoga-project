@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YogaAI - Peaceful Tips</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:"Poppins", sans-serif; }
+
+body {
+    min-height:100vh;
+    background:url("Yoga images/Bg.jpeg") no-repeat center center/cover;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    position:relative;
+    overflow-x:hidden;
+}
+
+body::before {
+    content:"";
+    position:absolute;
+    top:0; left:0;
+    width:100%; height:100%;
+    background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.3));
+    z-index:0;
+}
+
+.header {
+    text-align:center;
+    padding:50px 20px 20px;
+    color:#fff;
+    position:relative;
+    z-index:1;
+}
+.header h1 { font-size:2.8rem; text-shadow:0 0 15px rgba(255,255,255,0.4); }
+.header p { font-size:1.1rem; color:#f0f0f0; margin-top:8px; }
+.quote-box {
+    color:#fff;
+    font-size:1rem;
+    margin-top:12px;
+    background:rgba(255,255,255,0.1);
+    padding:8px 15px;
+    border-radius:12px;
+    backdrop-filter:blur(8px);
+}
+
+/* Tip Grid */
+.tip-grid-horizontal {
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:15px;
+    padding:20px;
+    z-index:1;
+}
+
+/* Tip Card - all same size */
+.tip-card {
+    width:260px;
+    background:rgba(85, 87, 85, 0.897);
+    border-radius:15px;
+    padding:12px;
+    box-shadow:0 6px 20px rgba(0,0,0,0.25);
+    backdrop-filter:blur(10px) saturate(150%);
+    border:1px solid rgba(255,255,255,0.2);
+    color:#fff;
+    transition:all 0.3s ease;
+    position:relative;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+}
+.tip-card:hover {
+    transform:translateY(-5px) scale(1.03);
+    box-shadow:0 15px 35px rgba(0,0,0,0.4);
+}
+.tip-card img {
+    width:100%;
+    height:160px;
+    object-fit:cover;
+    border-radius:12px;
+    margin-bottom:10px;
+    transition: transform 0.3s ease;
+}
+.tip-card img:hover { transform:scale(1.05); }
+.tip-card h2 {
+    font-size:1rem;
+    margin-bottom:6px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+}
+.tip-card p {
+    font-size:0.85rem;
+    line-height:1.4;
+}
+
+/* Back Button - Top Left */
+.back-btn {
+    position: absolute;
+    top: 25px;         /* distance from top */
+    left: 25px;        /* distance from left */
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #00c897, #007f5f);
+    color: #fff;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+.back-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+}
+
+
+
+/* Responsive */
+@media(max-width:768px){
+    .header h1{font-size:2rem;}
+    .header p{font-size:0.9rem;}
+    .tip-card{width:140px; padding:8px;}
+    .tip-card img{height:100px;}
+    .tip-card h2{font-size:0.8rem;}
+    .tip-card p{font-size:0.7rem;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <h1>Yoga Tips </h1>
+   <div class="quote-box" id="quote"></div>
+</div>
+<a href="home.html" class="back-btn">&larr; Back to Home</a>
+<div class="tip-grid-horizontal">
+  <div class="tip-card">
+    <img src="Yoga images/t1.jpg" alt="Time & Frequency">
+    <h2><i class="fas fa-clock"></i> Time & Frequency</h2>
+    <p>Practice at dawn or dusk. 10–15 minutes daily is better than 1 hour weekly.</p>
+  </div>
+  <div class="tip-card">
+    <img src="Yoga images/t2.jpg" alt="Mindful Breathing">
+    <h2><i class="fas fa-lungs"></i> Mindful Breathing</h2>
+    <p>Sync your breath with movement — inhale energy, exhale tension.</p>
+  </div>
+  <div class="tip-card">
+    <img src="Yoga images/t3.jpg" alt="Focus">
+    <h2><i class="fas fa-brain"></i> Focus</h2>
+    <p>Be present in each stretch and breath.</p>
+  </div>
+  <div class="tip-card">
+    <img src="Yoga images/t4.jpg" alt="Self Love">
+    <h2><i class="fas fa-heart"></i> Self Love</h2>
+    <p>Yoga is about connection with yourself, not perfection.</p>
+  </div>
+  <div class="tip-card">
+    <img src="Yoga images/t5.jpg" alt="Positive Energy">
+    <h2><i class="fas fa-sun"></i> Positive Energy</h2>
+    <p>Begin with gratitude — let your energy flow with sunlight and warmth.</p>
+  </div>
+  <div class="tip-card">
+    <img src="Yoga images/t6.jpg" alt="Natural Balance">
+    <h2><i class="fas fa-leaf"></i> Natural Balance</h2>
+    <p>Balance your poses like nature balances day and night — with harmony.</p>
+  </div>
+  <div class="tip-card">
+    <img src="Yoga images/t7.jpg" alt="Joyful Flow">
+    <h2><i class="fas fa-smile"></i> Joyful Flow</h2>
+    <p>Smile through your practice — joy is the essence of yoga.</p>
+  </div>
+  <div class="tip-card">
+    <img src="Yoga images/t9.jpg" alt="Hydrate & Nourish">
+    <h2><i class="fas fa-water"></i> Hydrate & Nourish</h2>
+    <p>Drink water after yoga, enjoy light fruits or herbal tea.</p>
+  </div>
+  <div class="tip-card">
+    <img src="Yoga images/t10.jpg" alt="Mind-Body Connection">
+    <h2><i class="fas fa-brain"></i> Mind-Body Connection</h2>
+    <p>Focus on each posture and breathing to strengthen the mind-body connection.</p>
+  </div>
+  <div class="tip-card">
+    <img src="Yoga images/t11.jpg" alt="Listen to Your Body">
+    <h2><i class="fas fa-ear-listen"></i> Listen to Your Body</h2>
+    <p>Never force poses — honor your limits to avoid strain or injury.</p>
+  </div>
+  <div class="tip-card">
+    <img src="Yoga images/t12.jpg" alt="Meditate Daily">
+    <h2><i class="fas fa-spa"></i> Meditate Daily</h2>
+    <p>Incorporate meditation to calm your mind and deepen your yoga practice.</p>
+  </div>
+  <div class="tip-card">
+  <img src="Yoga images/t13.jpg" alt="Inner Peace">
+  <h2><i class="fas fa-peace"></i> Inner Peace</h2>
+  <p>Find stillness within — true strength comes from a calm and centered mind.</p>
+</div>
+</div>
+
+
+
+<script>
+const quotes = [
+  "“Yoga is the journey of the self, through the self, to the self.” – Bhagavad Gita",
+  "“Inhale the future, exhale the past.”",
+  "“Yoga is not about touching your toes, it’s about what you learn on the way down.”",
+  "“Be where you are, not where you think you should be.”",
+  "“Peace comes from within. Do not seek it without.”"
+];
+document.getElementById("quote").innerText = quotes[Math.floor(Math.random()*quotes.length)];
+</script>
+
+</body>
+</html>

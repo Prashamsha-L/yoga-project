@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Surya Namaskar Pose Detection</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: 0.4s;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: 0.4s;
+    }
+
+    input:checked+.slider {
+      background-color: #4caf50;
+    }
+
+    input:checked+.slider:before {
+      transform: translateX(26px);
+    }
+
+    .slider.round {
+      border-radius: 34px;
+    }
+
+    .slider.round:before {
+      border-radius: 50%;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #000;
+      color: #fff;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .video-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+    }
+
+    video#webcam {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: 1;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 2;
+    }
+
+    #skeleton-toggle {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #top-info {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      z-index: 5;
+    }
+
+    #status-label {
+      font-size: 20px;
+      font-weight: bold;
+      color: #ff6b6b;
+    }
+
+    #pose-container {
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 5;
+      background-color: black;
+      padding: 40px;
+      border-radius: 50px;
+    }
+
+    #pose-label {
+      font-size: 34px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #ffffff;
+      line-height: 1.2;
+    }
+
+    #current-step {
+      font-size: 22px;
+      font-weight: bold;
+      color: #ffd700;
+      margin-top: 4px;
+    }
+
+    .controls {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      z-index: 3;
+    }
+
+    button {
+      padding: 10px 18px;
+      font-size: 15px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      opacity: 0.95;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    #startBtn {
+      background-color: #28a745;
+      color: #fff;
+    }
+
+    #stopBtn {
+      background-color: #dc3545;
+      color: #fff;
+    }
+
+    #skipBtn {
+      background-color: #ffc107;
+      color: #000;
+    }
+
+    #backBtn {
+      background-color: #007bff;
+      color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="video-container">
+    <div id="skeleton-toggle">
+      <label class="switch">
+        <input type="checkbox" id="toggleSkeleton" checked />
+        <span class="slider round"></span>
+      </label>
+      <span style="color:white; font-weight:bold;">Show Skeleton</span>
+    </div>
+
+    <video id="webcam" autoplay playsinline muted></video>
+    <canvas id="output_canvas"></canvas>
+
+    <div id="top-info">
+      <div id="status-label">Press Start to begin</div>
+    </div>
+
+    <div id="pose-container">
+      <div id="pose-label"></div>
+      <div id="current-step"></div>
+    </div>
+
+    <div class="controls">
+      <button id="startBtn">Start</button>
+      <button id="stopBtn" disabled>Stop</button>
+      <button id="skipBtn" disabled>Next Pose</button>
+      <button id="backBtn" onclick="window.location.href='home.html'">Back</button>
+    </div>
+  </div>
+
+  <!-- MediaPipe libs -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+
+  <script src="js/surya.js"></script>
+
+  <script>
+    const suryaPoses = [
+      "Pranamasana", "Hasta Uttanasana", "Padahastasana",
+      "Ashwa Sanchalanasana", "Chaturanga Dandasana", "Ashtanga Namaskar",
+      "Bhujangasana", "Adho Mukha Svanasana", "Ashwa Sanchalanasana",
+      "Padahastasana", "Hasta Uttanasana", "Pranamasana"
+    ];
+
+    let currentPoseIndex = 0;
+
+    function updatePoseDisplay() {
+      const label = document.getElementById("pose-label");
+      const stepEl = document.getElementById("current-step");
+
+      if (currentPoseIndex < suryaPoses.length) {
+        label.innerHTML = `<div>Upcoming Pose: <span style="color:#ffd700;">${suryaPoses[currentPoseIndex]}</span></div>`;
+        stepEl.textContent = `Pose ${currentPoseIndex + 1} of ${suryaPoses.length}`;
+      } else {
+        label.innerHTML = `<div style="color:#00ff88;">All poses completed!</div>`;
+        stepEl.textContent = "";
+        setTimeout(() => window.location.href = "surya_result.html", 1000);
+      }
+    }
+
+    // Detection callback
+    window.onSuryaDetected = function (detectedPose, meta) {
+      if (!detectedPose || currentPoseIndex >= suryaPoses.length) return;
+
+      const expected = suryaPoses[currentPoseIndex];
+      const label = document.getElementById("pose-label");
+
+      if (detectedPose.toLowerCase() === expected.toLowerCase()) {
+        label.innerHTML = `<div style="color:#00ff88;">${expected} - Correct</div>`;
+        currentPoseIndex++;
+        setTimeout(updatePoseDisplay, 800);
+      }
+    };
+
+    const startBtn = document.getElementById("startBtn");
+    const stopBtn = document.getElementById("stopBtn");
+    const skipBtn = document.getElementById("skipBtn");
+
+    startBtn.addEventListener("click", () => {
+      currentPoseIndex = 0;
+      updatePoseDisplay();
+      document.getElementById("status-label").style.display = "none";
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+      skipBtn.disabled = false;
+      if (window.startDetection) window.startDetection();
+    });
+
+    stopBtn.addEventListener("click", () => {
+      if (window.stopDetection) window.stopDetection(true);
+      setTimeout(() => window.location.href = "surya_result.html", 500);
+    });
+
+    skipBtn.addEventListener("click", () => {
+      if (currentPoseIndex < suryaPoses.length - 1) {
+        currentPoseIndex++;
+        updatePoseDisplay();
+      }
+    });
+
+    document.getElementById("toggleSkeleton").addEventListener("change", e => window.showSkeleton = e.target.checked);
+    updatePoseDisplay();
+  </script>
+</body>
+
+</html>

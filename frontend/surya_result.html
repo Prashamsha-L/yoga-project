@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Surya Namaskar — Results</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#f9fafb;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --accent-green:#10b981;
+      --accent-red:#ef4444;
+      --radius:12px;
+    }
+    body{margin:0;background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);padding:20px;}
+    .container{max-width:1200px;margin:0 auto;}
+    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+    h1{margin:0;font-size:26px}
+    .meta{font-size:14px;color:var(--muted)}
+    .layout{display:grid;grid-template-columns:320px 1fr;gap:20px}
+    .card{background:var(--card);border-radius:var(--radius);padding:18px;border:1px solid rgba(0,0,0,0.05)}
+    .summary { display:grid; gap:12px; }
+    .summary .item{display:flex;justify-content:space-between;align-items:center}
+    table{width:100%;border-collapse:collapse;margin-top:12px;background:#fefefe}
+    th,td{padding:12px;border-bottom:1px solid rgba(0,0,0,0.05);text-align:left}
+    th{font-weight:600;color:var(--muted)}
+    .progress{height:10px;background:#e5e7eb;border-radius:6px;overflow:hidden;width:100%}
+    .fill{height:100%;border-radius:6px;}
+    .small{font-size:13px;color:var(--muted)}
+    .joint-list{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+    .joint-pill{padding:6px 8px;border-radius:8px;font-size:13px;}
+    .joint-correct{background:rgba(16,185,129,0.2);color:var(--accent-green);}
+    .joint-wrong{background:rgba(239,68,68,0.2);color:var(--accent-red);}
+    @media(max-width:900px){.layout{grid-template-columns:1fr}}
+    button{padding:6px 12px;border:none;border-radius:6px;background:var(--accent-green);color:#fff;cursor:pointer;font-weight:600}
+    button:hover{opacity:0.9}
+  </style>
+</head>
+
+<body>
+<div class="container">
+  <header>
+    <div>
+      <h1> Surya Namaskar Results</h1>
+      <div class="meta" id="sessionMeta">Loading...</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button onclick="location.href='surya.html'">New Session</button>
+      <button onclick="window.print()">Print</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- SUMMARY -->
+    <div class="card">
+      <h2>Summary</h2>
+      <div class="summary" id="summaryCards"></div>
+
+      <div style="margin-top:12px">
+        <h3 style="margin:6px 0">Overall</h3>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="flex:1">
+            <div class="progress">
+              <div id="overallFill" class="fill" style="width:0%"></div>
+            </div>
+          </div>
+          <div style="width:70px;text-align:right;font-weight:700" id="overallPct">0%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DETAILS -->
+    <div class="card">
+      <h2>Detailed Analysis</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Pose</th>
+            <th style="width:220px">Accuracy</th>
+            <th>Suggestions</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  const data = JSON.parse(localStorage.getItem('suryaSessionFull') || '{}');
+
+  if (!data.steps || data.steps.length === 0) {
+    document.getElementById('tableBody').innerHTML =
+      '<tr><td colspan="4" class="small">No session data found.</td></tr>';
+    document.getElementById('sessionMeta').textContent = 'No data';
+  } else {
+
+    const steps = data.steps;
+
+    steps.forEach(step => {
+      const samples = step.roundSamples || [];
+      step.avg = samples.length
+        ? Math.round(samples.reduce((s,r)=>s+r.accuracy,0) / samples.length)
+        : 0;
+    });
+
+    const performed = steps.filter(s => s.avg > 0);
+    const overall = performed.length
+      ? Math.round(performed.reduce((s,p)=>s+p.avg,0) / performed.length)
+      : 0;
+
+    document.getElementById('sessionMeta').textContent =
+      `Completed: ${data.sessionDate}`;
+
+    document.getElementById('summaryCards').innerHTML = `
+      <div class="item"><div class="small">Overall Accuracy</div><div style="font-weight:700">${overall}%</div></div>
+      <div class="item"><div class="small">Poses Performed</div><div style="font-weight:700">${performed.length}/${steps.length}</div></div>
+      <div class="item"><div class="small">Good Poses</div><div style="font-weight:700">${steps.filter(s=>s.avg>=80).length}</div></div>
+    `;
+
+    function getAccuracyColor(acc){
+      return acc >= 65 ? 'var(--accent-green)' : 'var(--accent-red)';
+    }
+
+    document.getElementById('overallFill').style.width = overall + '%';
+    document.getElementById('overallFill').style.background = getAccuracyColor(overall);
+    document.getElementById('overallPct').textContent = overall + '%';
+
+    function jointSuggestionFromCorrections(agg){
+      const badges = [];
+      const lines = [];
+      for (const [j,c] of Object.entries(agg)){
+        const r=c.red||0, g=c.green||0;
+        if(r>=g && r>0){
+          lines.push(j.replace('_',' ') + ' needs correction');
+          badges.push(`<div class="joint-pill joint-wrong">${j.replace('_',' ')} ✗</div>`);
+        } else if(g>0){
+          badges.push(`<div class="joint-pill joint-correct">${j.replace('_',' ')} ✓</div>`);
+        }
+      }
+      return {
+        summary: lines.length ? lines.join('; ') : 'Good alignment',
+        jointBadgesHTML: badges.join('')
+      };
+    }
+
+    document.getElementById('tableBody').innerHTML = steps.map((step,i)=>{
+      const agg = {};
+      (step.roundSamples||[]).forEach(s=>{
+        for(const [j,v] of Object.entries(s.corrections||{})){
+          agg[j]=agg[j]||{red:0,green:0};
+          if(v==='red') agg[j].red++;
+          if(v==='green') agg[j].green++;
+        }
+      });
+      const sugg = jointSuggestionFromCorrections(agg);
+      const acc = step.avg || 0;
+      const color = getAccuracyColor(acc);
+
+      return `
+        <tr>
+          <td>${i+1}</td>
+          <td><strong>${step.expected}</strong></td>
+          <td>
+            <div class="progress">
+              <div class="fill" style="width:${acc}%;background:${color}"></div>
+            </div>
+            <div style="margin-top:6px;font-weight:700;color:${color}">${acc}%</div>
+          </td>
+          <td>
+            <div class="small">${sugg.summary}</div>
+            <div class="joint-list">${sugg.jointBadgesHTML}</div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+</script>
+</body>
+</html>

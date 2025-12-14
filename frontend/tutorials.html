@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YogaAI — Tutorials</title>
+<style>
+  body {
+  margin: 0;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  background: 
+    url("Yoga images/Bg.jpeg") no-repeat center center fixed;
+  background-size: cover;
+  color: #333;
+}
+  /* Section */
+  .section {
+    max-width: 1200px;
+    margin: 50px auto;
+    padding: 20px;
+    margin-top: 20px;
+  }
+  .section h2 {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 35px;
+    margin: 30px;
+    color: white;
+  }
+  /* Search bar */
+  .search-container {
+    text-align: center;
+    margin-bottom: 20px;
+    margin-top: 30px;
+  }
+
+  .search-container input {
+    padding: 10px;
+    width: 350px;
+    border-radius: 5px;
+    border: 1px solid #0f3719;
+  }
+
+  .search-container button {
+    padding: 10px 15px;
+    border: none;
+    background-color: #137a1a;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+      .search-container button:hover { background: #08360b; transform: scale(1.05); }
+
+
+
+  /* CARD STYLE GRID */
+  .poses-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+
+  .pose-card {
+    border-radius: 16px;
+    padding: 15px;
+    background: #ffffff;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  /* Hover animation */
+  .pose-card:hover {
+    transform: translateY(-10px) scale(1.03);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+  }
+
+  /* Title */
+  .pose-card h3 {
+    font-size: 1.1rem;
+    margin: 10px 0 15px;
+    color: #035620;
+  }
+
+  /* Video + Iframe styling */
+  .pose-card iframe,
+  .pose-card video {
+    width: 100%;
+    height: 180px;
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  }
+
+  /* Unique gradient card backgrounds */
+  .pose-card:nth-child(3n+1) {
+    background: linear-gradient(160deg, #cfe6d7, #b2ebf2);
+  }
+  .pose-card:nth-child(3n+2) {
+    background: linear-gradient(160deg, #b2e5b5, #a7e2b9);
+  }
+  .pose-card:nth-child(3n) {
+    background: linear-gradient(160deg, #84d990, #88e875);
+  }
+  
+/* Navbar */
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(8px);
+    padding: 12px 30px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.logo { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    font-weight: bold; 
+    color: #035620; 
+    font-size: 1.5rem; 
+}
+.logo img { 
+    height: 50px; 
+    width: 50px; 
+    border-radius: 50%; 
+    object-fit: cover; 
+    box-shadow: 0 3px 8px rgba(0,0,0,0.3); 
+}
+
+nav ul { 
+    list-style: none; 
+    display: flex; 
+    gap: 20px; 
+    margin: 0; 
+    padding: 0; 
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: #000;
+    font-weight: bold;
+    font-size: 1rem;
+    position: relative;
+    padding: 4px 0;
+}
+
+/* Underline hover effect */
+nav ul li a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 0%;
+    height: 2px;
+    background: #035620;
+    transition: width 0.3s ease;
+}
+
+nav ul li a:hover::after {
+    width: 100%;
+}
+
+/* Active link stays underlined */
+nav ul li a.active::after {
+    width: 100%;
+}
+.pose-english {
+  font-style: bold;
+  font-weight: 700;      /* bolder text */
+  font-size: 1.1rem;       /* slightly smaller */
+  color: #035620;        /* same green theme */
+  margin-top: -6px;      /* reduced space between lines */
+}
+
+
+
+
+</style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav>
+  <div class="logo">
+    <img src="Yoga images/yo9.jpg" alt="YogaAI Logo">
+    <span>YogaAI</span>
+  </div>
+  <ul>
+    <li><a href="home.html">Home</a></li>
+    <li><a href="posture.html">Posture Detection</a></li>
+    <li><a href="tutorials.html" class="active">Tutorials</a></li>
+    <li><a href="library.html">Library</a></li>
+    <li><a href="calorie.html">Calorie</a></li>
+    <li><a href="diseas.html">Disease Info</a></li>
+    <li><a href="about.html">About Us</a></li>
+    <li><a href="contact.html">Contact</a></li>
+    <li><a href="profile.html">Profile</a></li>
+    <li><a href="index.html">Logout</a></li>
+  </ul>
+</nav>
+<div>
+  <h1 style="color: white; text-align:center;">Yoga Tutorials</h2>
+</div>
+<!-- Search Bar -->
+<div class="search-container">
+  <input type="text" id="searchInput" placeholder="Search for a pose...">
+  <button onclick="searchPose()">Search</button>
+</div>
+
+<!-- Beginners Section -->
+<div class="section">
+  <h2>Beginner Poses</h2>
+  <div class="poses-container">
+
+    <div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/ETSIv8WetjI" allowfullscreen></iframe>
+  <h3>Adho Mukha Svanasana</h3>
+  <p class="pose-english">(Downward Dog)</p>
+</div>
+
+
+    <div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/0E0Jwl8YyDE" allowfullscreen></iframe>
+  <h3>Ananda Balasana</h3>
+  <p class="pose-english">(Happy Baby)</p>
+</div>
+    <div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/0MocS7WERnM" allowfullscreen></iframe>
+  <h3>Anjaneyasana</h3>
+  <p class="pose-english">(Low Lunge)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/eXldBnUmlrc" allowfullscreen></iframe>
+  <h3>Ardha Chakrasana</h3>
+  <p class="pose-english">(Half Wheel)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/VI3A1wQgl8w" allowfullscreen></iframe>
+  <h3>Ardha Uttanasana</h3>
+  <p class="pose-english">(Half Forward Bend)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/bCyk1sNm39k" allowfullscreen></iframe>
+  <h3>Baddha Konasana</h3>
+  <p class="pose-english">(Bound Angle)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/2MJGg-dUKh0" allowfullscreen></iframe>
+  <h3>Balasana</h3>
+  <p class="pose-english">(Child’s Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/fOdrW7nf9gw" allowfullscreen></iframe>
+  <h3>Bhujangasana</h3>
+  <p class="pose-english">(Cobra Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/TNgNjUIiktA" allowfullscreen></iframe>
+  <h3>Bitilasana</h3>
+  <p class="pose-english">(Cow Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/g9zt9Vx6WBo" allowfullscreen></iframe>
+  <h3>Dandasana</h3>
+  <p class="pose-english">(Staff Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/SL-E6ZKlm4U" allowfullscreen></iframe>
+  <h3>Marjariasana</h3>
+  <p class="pose-english">(Cat Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/pZhqI4SUDmA" allowfullscreen></iframe>
+  <h3>Paripurna Navasana</h3>
+  <p class="pose-english">(Full Boat Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/VLzV9wkUANo" allowfullscreen></iframe>
+  <h3>Tadasana Samasthiti</h3>
+  <p class="pose-english">(Mountain Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/7doH7M1aQMg" allowfullscreen></iframe>
+  <h3>Tadasana Urdhva Baddha Hastasana</h3>
+  <p class="pose-english">(Raised Hands)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/6rZ2azUHN-Q" allowfullscreen></iframe>
+  <h3>Tadasana Urdhva Hastasana</h3>
+  <p class="pose-english">(Upward Mountain Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/CaAUPUi8GUc" allowfullscreen></iframe>
+  <h3>Utthita Hasta Padasana</h3>
+  <p class="pose-english">(Extended Hand to Foot Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/S6gB0QHbWFE" allowfullscreen></iframe>
+  <h3>Utthita Trikonasana</h3>
+  <p class="pose-english">(Extended Triangle Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/K8l1SD3I4ys" allowfullscreen></iframe>
+  <h3>Vajrasana</h3>
+  <p class="pose-english">(Thunderbolt Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/kkGY3xBnaGc" allowfullscreen></iframe>
+  <h3>Virabhadrasana One</h3>
+  <p class="pose-english">(Warrior I)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/CllqUxR5-9Q" allowfullscreen></iframe>
+  <h3>Virabhadrasana Two</h3>
+  <p class="pose-english">(Warrior II)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/uELr6MPi7pI" title="Vrikshasana Tutorial" allowfullscreen></iframe>
+  <h3>Vrikshasana</h3>
+  <p class="pose-english">(Tree Pose)</p>
+</div>
+
+  </div>
+</div>
+
+<!-- Intermediate Poses Section -->
+<div class="section">
+  <h2>Intermediate Poses</h2>
+  <div class="poses-container">
+
+    <div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/lNxfdoQp27Y" allowfullscreen></iframe>
+  <h3>Anantasana</h3>
+  <p class="pose-english">(Side Reclining Leg Lift)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/8GGoyeX2-ME" allowfullscreen></iframe>
+  <h3>Ardha Chandrasana</h3>
+  <p class="pose-english">(Half Moon Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/yYy6w8_hLTE" allowfullscreen></iframe>
+  <h3>Ardha Matsyendrasana</h3>
+  <p class="pose-english">(Half Spinal Twist)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/JUA8TCfUlgw" allowfullscreen></iframe>
+  <h3>Dhanurasana</h3>
+  <p class="pose-english">(Bow Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/mShiybR35zk" allowfullscreen></iframe>
+  <h3>Malasana</h3>
+  <p class="pose-english">(Garland Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/2HJvzYzjaP0" allowfullscreen></iframe>
+  <h3>Natarajasana</h3>
+  <p class="pose-english">(Dancer Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/UTOBheDjLhQ" allowfullscreen></iframe>
+  <h3>Padmasana</h3>
+  <p class="pose-english">(Lotus Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/75KgVb1hhwo" allowfullscreen></iframe>
+  <h3>Parighasana</h3>
+  <p class="pose-english">(Gate Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/TBwM61wG5Vk" allowfullscreen></iframe>
+  <h3>Parivritta Trikonasana</h3>
+  <p class="pose-english">(Revolved Triangle Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/pvIjsG5Svck" allowfullscreen></iframe>
+  <h3>Phalakasana</h3>
+  <p class="pose-english">(Plank Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/g78vfuC4QBI" allowfullscreen></iframe>
+  <h3>Setu Bandha Sarvangasana</h3>
+  <p class="pose-english">(Bridge Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/CllqUxR5-9Q" allowfullscreen></iframe>
+  <h3>Urdhva Dhanurasana</h3>
+  <p class="pose-english">(Upward Bow / Wheel Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/4xyTmX_OMiM" allowfullscreen></iframe>
+  <h3>Utkatasana</h3>
+  <p class="pose-english">(Chair Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/KuZOYyH7nw4" allowfullscreen></iframe>
+  <h3>Utkata Konasana</h3>
+  <p class="pose-english">(Goddess Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/mytWLo8fHbw" allowfullscreen></iframe>
+  <h3>Uttana Shishosana</h3>
+  <p class="pose-english">(Extended Puppy Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/WklJNYaayP8" allowfullscreen></iframe>
+  <h3>Uttanasana</h3>
+  <p class="pose-english">(Standing Forward Bend)</p>
+</div>
+<div class="pose-card">
+  <iframe width="100%" height="250" src="https://www.youtube.com/embed/aoB5L6AxckU" title="Utthita Parsvakonasana Tutorial" allowfullscreen></iframe>
+  <h3>Utthita Parsvakonasana</h3>
+  <p class="pose-english">(Extended Side Angle Pose)</p>
+</div>
+
+
+  </div>
+</div>
+
+<!-- Advanced Poses Section -->
+<div class="section">
+  <h2>Advanced Poses</h2>
+  <div class="poses-container">
+
+    <div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/d_dh_DwDr84" allowfullscreen></iframe>
+  <h3>Gomukhasana</h3>
+  <p class="pose-english">(Cow Face Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/hmerP6a8McE" allowfullscreen></iframe>
+  <h3>Halasana</h3>
+  <p class="pose-english">(Plow Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/M1gEGLtF1p0" allowfullscreen></iframe>
+  <h3>Kapotasana</h3>
+  <p class="pose-english">(Pigeon Pose / King Pigeon)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/O6i8_G_zItM" allowfullscreen></iframe>
+  <h3>Mayurasana</h3>
+  <p class="pose-english">(Peacock Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/L2m5xrmf4_Q" allowfullscreen></iframe>
+  <h3>Svarga Dvidasana</h3>
+  <p class="pose-english">(Bird of Paradise Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/8K0ghCn8O_E" allowfullscreen></iframe>
+  <h3>Tittibhasana</h3>
+  <p class="pose-english">(Firefly Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/hYgJgfGn02g" allowfullscreen></iframe>
+  <h3>Utthita Hasta Padangusthasana</h3>
+  <p class="pose-english">(Extended Hand to Big Toe Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/4SN1nhO9V8M" allowfullscreen></iframe>
+  <h3>Urdhva Dandasana</h3>
+  <p class="pose-english">(Upward Staff Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/ggch320r6MY" allowfullscreen></iframe>
+  <h3>Vasisthasana</h3>
+  <p class="pose-english">(Side Plank Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/nv3rEc0MP9Q" allowfullscreen></iframe>
+  <h3>Virabhadrasana III</h3>
+  <p class="pose-english">(Warrior III)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/l-kPSc8e0Fc" allowfullscreen></iframe>
+  <h3>Visvamitrasana</h3>
+  <p class="pose-english">(Visvamitra’s Pose)</p>
+</div>
+
+<div class="pose-card">
+  <iframe src="https://www.youtube.com/embed/FgGKkOB71R0" allowfullscreen></iframe>
+  <h3>Vrichikasana</h3>
+  <p class="pose-english">(Scorpion Pose)</p>
+</div>
+
+  </div>
+  
+</div>
+<!-- Surya Namaskar Section -->
+<div class="section">
+  <h2>Surya Namaskar (Sun Salutation)</h2>
+  <div class="poses-container">
+
+    <div class="pose-card">
+      <iframe src="https://www.youtube.com/embed/gzmUsJBcqJA" allowfullscreen></iframe>
+      <h3>Surya Namaskar </h3>
+      <p class="pose-english">(Sun Salutation )</p>
+    </div>
+
+    <div class="pose-card">
+      <iframe src="https://www.youtube.com/embed/38GTnjg_aBA" allowfullscreen></iframe>
+      <h3>Surya Namaskar Part 1</h3>
+      <p class="pose-english">(Sun Salutation Step 1)</p>
+    </div>
+
+    <div class="pose-card">
+      <iframe src="https://www.youtube.com/embed/Ey4qJFFsReU" allowfullscreen></iframe>
+      <h3>Surya Namaskar Part 2</h3>
+      <p class="pose-english">(Sun Salutation Step 2)</p>
+    </div>
+
+    <div class="pose-card">
+      <iframe src="https://www.youtube.com/embed/D9fKzVdNm_U" allowfullscreen></iframe>
+      <h3>Surya Namaskar Part 3</h3>
+      <p class="pose-english">(Sun Salutation Step 3)</p>
+    </div>
+
+    
+  </div>
+</div>
+
+
+
+    
+
+  </div>
+</div>
+<script>
+  document.getElementById('searchInput').addEventListener('input', function () {
+    const query = this.value.toLowerCase();
+    const cards = document.querySelectorAll('.pose-card');
+    let found = false;
+
+    cards.forEach(card => {
+      const title = card.querySelector('h3').innerText.toLowerCase();
+      if (title.includes(query)) {
+        card.style.display = "flex"; // show matching card
+        found = true;
+      } else {
+        card.style.display = "none"; // hide others
+      }
+    });
+
+    if (!found && query.trim() !== "") {
+      // hide all if nothing matches
+      cards.forEach(card => card.style.display = "none");
+    }
+
+    if (query.trim() === "") {
+      // if search box empty, show all poses
+      cards.forEach(card => card.style.display = "flex");
+    }
+  });
+</script>
+
+
+
+</body>
+</html>
