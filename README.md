@@ -1,6 +1,6 @@
 # AI Powered Yoga Posture Detection and Correction with Personalized Wellness Insights
 
-YogiAlign is an AI-powered yoga posture detection and correction system designed to help users practice yoga with correct alignment and form. The system uses Mediapipe library for the keypoint extraction and XGBoost algorithm for predicting the postures.
+YogaAI is an AI-powered yoga posture detection and correction system designed to help users practice yoga with correct alignment and form. The system uses Mediapipe library for the keypoint extraction and XGBoost algorithm for predicting the postures.
 
 ## Features
 - Real-time yoga pose detection using webcam
