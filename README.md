@@ -30,6 +30,7 @@ YogaAI is an AI-powered yoga posture detection and correction system designed to
 
 ### Installing Dependencies
 1) Clone the Repository
+<br>
 `git clone <repository-url>`
 <br>
 
