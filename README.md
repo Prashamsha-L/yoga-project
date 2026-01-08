@@ -30,16 +30,18 @@ YogaAI is an AI-powered yoga posture detection and correction system designed to
 
 ### Installing Dependencies
 1) Clone the Repository
-<br>
+
 `git clone <repository-url>`
 <br>
 
 `cd YogaAI_1`
 
 2) Install Python Libraries
+
 `pip install -r requirements.txt`
 
 3) Install Node.js Dependencies
+
 `cd yogaai-backend`
 <br>
 
@@ -58,12 +60,14 @@ YogaAI is an AI-powered yoga posture detection and correction system designed to
 `node server.js`
 
 3) Contact Module
+
 `cd frontend`
 <br>
 
 `python app.py`
 
 4) Yoga Posture Detection (FastAPI)
+
 `cd backend`
 <br>
 
