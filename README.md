@@ -42,6 +42,7 @@ npm install
 
 ### Project Execution
 1) Navigate to the main project directory
+'''bash
 cd YogaAI_1
 
 2) Login / Signup Backend (Node.js)
