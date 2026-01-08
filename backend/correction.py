@@ -13,12 +13,11 @@ def speak_feedback(messages):
 
 POSE_SYMMETRIC = {
     "Pranamasana":{
-        "left_elbow": 30, "right_elbow": 30,
-        "left_shoulder": 25, "right_shoulder": 25,
+        "left_elbow": 40, "right_elbow": 35,
+        "left_shoulder": 35, "right_shoulder": 25,
         "left_knee": 180, "right_knee": 180,
         "left_hip": 180, "right_hip": 180
     },
-# --------------------------------------------
     "Padahastasana":{
         "left_elbow": 180, "right_elbow": 180,
         "left_shoulder": 135, "right_shoulder": 135,
@@ -38,7 +37,7 @@ POSE_SYMMETRIC = {
         "left_hip": 180, "right_hip": 172
     },
     
-    "Ashtanaga Namaskar":{
+    "Ashtanga Namaskar":{
         "left_elbow": 30, "right_elbow": 30,
         "left_shoulder": 10, "right_shoulder": 10,
         "left_knee": 115, "right_knee": 115,
@@ -51,6 +50,7 @@ POSE_SYMMETRIC = {
         "left_knee": 175, "right_knee": 175,
         "left_hip": 50, "right_hip": 50
     },
+# ------------------   
     "Ananda balasana": {
         "left_elbow": 165, "right_elbow": 160,
         "left_shoulder": 80, "right_shoulder": 80,
@@ -364,7 +364,7 @@ POSE_FEEDBACK = {
         "right_hip": "Balance right hip evenly" 
         },
 
-        "Ashtanaga Namaskar":{
+        "Ashtanga Namaskar":{
         "left_elbow": "Keep left elbow straight",
         "right_elbow": "Keep right elbow straight",
         "left_shoulder": "Open left shoulder outward",

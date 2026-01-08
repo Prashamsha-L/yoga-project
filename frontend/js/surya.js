@@ -179,6 +179,7 @@
   }
 
   function advancePose() {
+    
     if (window.currentPoseIndex < MIN_POSE_COUNT - 1) {
       window.currentPoseIndex++;
     } else {

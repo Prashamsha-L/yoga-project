@@ -29,3 +29,5 @@ YogaAI is an AI-powered yoga posture detection and correction system designed to
 
 
 
+
+

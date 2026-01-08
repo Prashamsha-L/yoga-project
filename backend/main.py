@@ -33,7 +33,7 @@ with open("surya_namaskar.pkl", "rb") as f:
 # Surya pose labels
 surya_labels = {
     0: "Adho Mukha Svanasana",
-    1: "Ashtanaga Namaskar",
+    1: "Ashtanga Namaskar",
     2: "Ashwa Sanchalanasana",
     3: "Ashwa Sanchalanasana",
     4: "Bhujangasana",
@@ -50,7 +50,7 @@ MIN_ANGLE_COUNT = 8          # expect 8 angle features
 
 
 pose_labels =  {
-    0: 'Adho Mukha Savanasana',
+    0: 'Adho Mukha Svanasana',
     1: 'Ananda balasana',
     2: 'Anantasana',
     3: 'Anjaneyasana',
@@ -96,7 +96,7 @@ pose_labels =  {
     43: 'Virabhadrasana III',
     44: 'Visvamitrasana',
     45: 'Vrichikasana',
-    46: 'Vrksasana'
+    46: 'Vrkshasana'
 }
 
 from correction import check_pose
