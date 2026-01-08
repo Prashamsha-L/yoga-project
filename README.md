@@ -46,8 +46,9 @@ npm install
 `cd YogaAI_1`
 
 2) Login / Signup Backend (Node.js)
----
+
 `cd yogaai-backend
+<br>
 node server.js`
 
 3) Contact Module
