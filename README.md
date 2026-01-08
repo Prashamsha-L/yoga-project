@@ -42,11 +42,13 @@ npm install
 
 ### Project Execution
 1) Navigate to the main project directory
+---
 `cd YogaAI_1`
 
 2) Login / Signup Backend (Node.js)
-cd yogaai-backend
-node server.js
+---
+`cd yogaai-backend
+node server.js`
 
 3) Contact Module
 cd frontend
