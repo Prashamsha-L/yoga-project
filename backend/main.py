@@ -238,4 +238,3 @@ async def predict_surya(request: Request):
     except Exception as e:
         return JSONResponse({"pose": f"Error: {str(e)}", "confidence": 0.0})
 
-

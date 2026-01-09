@@ -5,7 +5,7 @@
   <title>Yoga Pose Detection</title>
   <style>
 
-    .switch {
+  .switch {
   position: relative;
   display: inline-block;
   width: 60px;
@@ -71,8 +71,6 @@ input:checked + .slider:before {
       text-align: center;
      }
 
-    /* ✅ Make video full screen and behind canvas
-    background: rgba(255, 255, 255, 0.7); */
     video#webcam {
       display: block;
       position: absolute;
@@ -277,7 +275,6 @@ color: white;
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils"></script>
   <script src="js/mediapipe-integration.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
 
 
   <script>
@@ -401,22 +398,22 @@ progressRing.style.strokeDashoffset = circumference;
   // setTimeout(() => {
   //   statusLabel.style.display = "none";
   // }, 4000);
-  try{
+//   try{
 
-  const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-  videoElement.srcObject = stream;
+//   const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+//   videoElement.srcObject = stream;
 
-  if (typeof mpPoseCamera !== "undefined") {
-    camera = new mpPoseCamera(videoElement, {
-      onFrame: async () => { await pose.send({ image: videoElement }); },
-      width: 1280,
-      height: 720
-    });
-    camera.start();
-  }
-} catch (err) {
-    console.error("Webcam access failed:", err);
-  }
+//   if (typeof mpPoseCamera !== "undefined") {
+//     camera = new mpPoseCamera(videoElement, {
+//       onFrame: async () => { await pose.send({ image: videoElement }); },
+//       width: 1280,
+//       height: 720
+//     });
+//     camera.start();
+//   }
+// } catch (err) {
+//     console.error("Webcam access failed:", err);
+//   }
 });
 
 
@@ -440,15 +437,15 @@ progressRing.style.strokeDashoffset = circumference;
     observer.observe(poseLabel, { childList: true });
 
     // MediaPipe results callback
-  function onPoseResults(results) {
-  if (!results.poseLandmarks || results.poseLandmarks.length < 25) {
-    poseLabel.textContent = "Full body not visible";
-    return;
-  }
+//   function onPoseResults(results) {
+//   if (!results.poseLandmarks || results.poseLandmarks.length < 25) {
+//     poseLabel.textContent = "Full body not visible";
+//     return;
+//   }
 
-  const detectedPose = "DetectedPoseName"; // Replace with model prediction
-  poseLabel.textContent = `Pose: ${detectedPose}`;
-}
+//   const detectedPose = "DetectedPoseName"; // Replace with model prediction
+//   poseLabel.textContent = `Pose: ${detectedPose}`;
+// }
 
   </script>
 </body>

@@ -59,20 +59,30 @@
   }
 
   function initEmptySession() {
-    return {
-      steps: window.suryaPoses.map((p, i) => ({
+  const stepsPerRound = window.suryaPoses.length;
+  const totalSteps = (window.totalRounds || 1) * stepsPerRound;
+  
+  return {
+    steps: Array(totalSteps).fill().map((_, i) => {
+      const round = Math.floor(i / stepsPerRound) + 1;
+      const poseIndex = i % stepsPerRound;
+      return {
         index: i + 1,
-        expected: p,
+        round: round,
+        expected: window.suryaPoses[poseIndex],
         detected: "Not performed",
         accuracy: 0,
         corrections: {},
         timestamp: null,
         roundSamples: []
-      })),
-      sessionDate: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
-      overallAccuracy: 0
-    };
-  }
+      };
+    }),
+    totalRounds: window.totalRounds || 1,
+    sessionDate: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+    overallAccuracy: 0
+  };
+}
+
 
   function saveSession() {
     localStorage.setItem("suryaSessionFull", JSON.stringify(sessionResults));
@@ -93,7 +103,7 @@
     }
     try {
       const parsed = JSON.parse(raw);
-      if (!parsed.steps || parsed.steps.length !== MIN_POSE_COUNT) {
+      if (!parsed.steps || !window.totalRounds || parsed.steps.length !== (window.totalRounds * MIN_POSE_COUNT)) {
         sessionResults = initEmptySession();
       } else {
         sessionResults = parsed;
@@ -116,78 +126,72 @@
   }
 
   function recordPoseAttempt(accuracy, corrections, detected = "Attempted") {
-    const idx = window.currentPoseIndex;
-    if (idx >= MIN_POSE_COUNT) return false;
+  // Calculate correct index: (currentRound-1) * 12 + currentPoseIndex
+  const roundOffset = ((window.currentRound || 1) - 1) * MIN_POSE_COUNT;
+  const poseIndex = window.currentPoseIndex || window.globalPoseIndex || 0;
+  const idx = roundOffset + poseIndex;
+  
+  const totalSteps = (window.totalRounds || 1) * MIN_POSE_COUNT;
+  if (idx >= totalSteps) return false;
 
-    const finalAccuracy = calculateAccuracyFromCorrections(corrections);
-    
-    sessionResults.steps[idx].roundSamples.push({
-      accuracy: finalAccuracy,
-      corrections: corrections,
-      detected: detected,
-      timestamp: Date.now()
-    });
+  const finalAccuracy = calculateAccuracyFromCorrections(corrections);
+  
+  sessionResults.steps[idx].roundSamples.push({
+    accuracy: finalAccuracy,
+    corrections: corrections,
+    detected: detected,
+    timestamp: Date.now()
+  });
 
-    updatePoseAverage(idx);
-    sessionResults.steps[idx].detected = detected;
-    sessionResults.steps[idx].corrections = corrections;
-    sessionResults.steps[idx].timestamp = Date.now();
+  updatePoseAverage(idx);
+  sessionResults.steps[idx].detected = detected;
+  sessionResults.steps[idx].corrections = corrections;
+  sessionResults.steps[idx].timestamp = Date.now();
 
-    saveSession();
-    return true;
-  }
+  saveSession();
+  return true;
+}
+
 
   async function sendSuryaAngles(angles) {
-    try {
-      const res = await fetch(MODEL_ENDPOINT, { 
-        method: 'POST', 
-        headers: {'Content-Type': 'application/json'}, 
-        body: JSON.stringify({ angles }) 
-      });
-      if (!res.ok) throw new Error('Model HTTP ' + res.status);
-      
-      const data = await res.json();
-      const detectedPose = (data.pose || 'No Pose').trim();
-      window.currentDetectedPose = detectedPose;
-      window.latestCorrections = data.corrections || {};
-      
-      const accuracy = calculateAccuracyFromCorrections(data.corrections);
-      window.currentPoseAccuracy = accuracy;
-
-      recordPoseAttempt(accuracy, data.corrections);
-
-      const expectedPose = window.suryaPoses[window.currentPoseIndex];
-      
-      if (detectedPose.toLowerCase() === expectedPose.toLowerCase()) {
-        holdMatchCount++;
-        if (holdMatchCount >= POSE_HOLD_THRESHOLD) {
-          holdMatchCount = 0;
-          advancePose();
-          return;
-        }
-      } else {
-        holdMatchCount = 0;
-      }
-
-      if (window.onSuryaDetected) 
-        window.onSuryaDetected(detectedPose, { accuracy: window.currentPoseAccuracy });
-
-    } catch(e) {
-      recordPoseAttempt(0, {}, "Error");
-      if (window.onSuryaDetected) window.onSuryaDetected('No Pose', { accuracy: 0 });
-    }
-  }
-
-  function advancePose() {
+  try {
+    const res = await fetch(MODEL_ENDPOINT, { 
+      method: 'POST', 
+      headers: {'Content-Type': 'application/json'}, 
+      body: JSON.stringify({ angles }) 
+    });
+    if (!res.ok) throw new Error('Model HTTP ' + res.status);
     
-    if (window.currentPoseIndex < MIN_POSE_COUNT - 1) {
-      window.currentPoseIndex++;
-    } else {
-      speak("Well done! All poses completed!");
-      stopDetection(true);
-    }
-    saveSession();
+    const data = await res.json();
+    const detectedPose = (data.pose || 'No Pose').trim();
+    window.currentDetectedPose = detectedPose;
+    window.latestCorrections = data.corrections || {};
+    
+    const accuracy = calculateAccuracyFromCorrections(data.corrections);
+    window.currentPoseAccuracy = accuracy;
+
+    recordPoseAttempt(accuracy, data.corrections);  // Records using globalPoseIndex
+
+    if (window.onSuryaDetected) 
+      window.onSuryaDetected(detectedPose, { accuracy: window.currentPoseAccuracy });
+
+  } catch(e) {
+    recordPoseAttempt(0, {}, "Error");
+    if (window.onSuryaDetected) window.onSuryaDetected('No Pose', { accuracy: 0 });
   }
+}
+
+
+  // function advancePose() {
+    
+  //   if (window.currentPoseIndex < MIN_POSE_COUNT - 1) {
+  //     window.currentPoseIndex++;
+  //   } else {
+  //     speak("Well done! All poses completed!");
+  //     stopDetection(true);
+  //   }
+  //   saveSession();
+  // }
 
   function angleABC(A,B,C){ 
     if(!A||!B||!C) return 0; 

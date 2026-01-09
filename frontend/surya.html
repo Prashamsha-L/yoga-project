@@ -208,6 +208,24 @@
     <div id="top-info">
       <div id="status-label">Press Start to begin</div>
     </div>
+    <div id="round-card" style="
+  position: absolute;
+  top: 60%;
+  left: 20px;
+  background: rgba(0,0,0,0.8);
+  padding: 15px 20px;
+  border-radius: 15px;
+  z-index: 5;
+  text-align: center;
+  min-width: 120px;
+  display: none;
+">
+  <div style="font-size: 18px; font-weight: bold; color: #ffd700; margin-bottom: 5px;">Round</div>
+  <div id="round-display" style="font-size: 24px; font-weight: bold; color: #fff;">1</div>
+  <div style="font-size: 14px; color: #ccc; margin-top: 8px;">Step</div>
+  <div id="step-display" style="font-size: 20px; font-weight: bold; color: #00ff88;">1/12</div>
+</div>
+
 
     <div id="pose-container">
       <div id="pose-label"></div>
@@ -244,43 +262,98 @@
       const label = document.getElementById("pose-label");
       const stepEl = document.getElementById("current-step");
 
-      if (currentPoseIndex < suryaPoses.length) {
-        label.innerHTML = `<div>Upcoming Pose: <span style="color:#ffd700;">${suryaPoses[currentPoseIndex]}</span></div>`;
-        stepEl.textContent = `Pose ${currentPoseIndex + 1} of ${suryaPoses.length}`;
-      } else {
-        label.innerHTML = `<div style="color:#00ff88;">All poses completed!</div>`;
-        stepEl.textContent = "";
-        setTimeout(() => window.location.href = "surya_result.html", 1000);
-      }
-    }
+      // Only check rounds if session started
+if (!window.totalRounds || !window.currentRound) {
+  label.innerHTML = `<div>Upcoming Pose: <span style="color:#ffd700;">${suryaPoses[currentPoseIndex]}</span></div>`;
+  stepEl.textContent = `Pose ${currentPoseIndex + 1} of ${suryaPoses.length}`;
+} else if (currentPoseIndex >= suryaPoses.length && window.currentRound <= window.totalRounds) {
+  // End of round, start next round
+  label.innerHTML = `<div style="color:#00ff88;">Round ${window.currentRound - 1} Complete!</div>`;
+  stepEl.textContent = `Starting Round ${window.currentRound}`;
+  setTimeout(() => {
+    currentPoseIndex = 0;
+    window.globalPoseIndex = 0;
+    window.currentPoseIndex = 0;
+    updatePoseDisplay();
+  }, 1500);
+} else if (window.currentRound > window.totalRounds) {
+  label.innerHTML = `<div style="color:#00ff88;">All ${window.totalRounds} rounds completed!</div>`;
+  stepEl.textContent = "";
+  setTimeout(() => window.location.href = "surya_result.html", 2000);
+} else {
+  label.innerHTML = `<div>Upcoming Pose: <span style="color:#ffd700;">${suryaPoses[currentPoseIndex]}</span></div>`;
+  stepEl.textContent = `Pose ${currentPoseIndex + 1} of ${suryaPoses.length}`;
+}
 
+
+        // Update round/step display
+  if (window.totalRounds && window.currentRound) {
+    document.getElementById("round-card").style.display = "block";
+    document.getElementById("round-display").textContent = window.currentRound;
+    document.getElementById("step-display").textContent = `${currentPoseIndex + 1}/12`;
+  } else {
+  document.getElementById("round-card").style.display = "none";
+}
+
+    }
+    window.globalPoseIndex = 0; 
     // Detection callback
     window.onSuryaDetected = function (detectedPose, meta) {
-      if (!detectedPose || currentPoseIndex >= suryaPoses.length) return;
+  if (!detectedPose) return;
 
-      const expected = suryaPoses[currentPoseIndex];
-      const label = document.getElementById("pose-label");
+  const expected = suryaPoses[currentPoseIndex];
+  const label = document.getElementById("pose-label");
 
-      if (detectedPose.toLowerCase() === expected.toLowerCase()) {
-        label.innerHTML = `<div style="color:#00ff88;">${expected} - Correct</div>`;
-        currentPoseIndex++;
-        setTimeout(updatePoseDisplay, 800);
-      }
-    };
+  if (detectedPose.toLowerCase() === expected.toLowerCase()) {
+    label.innerHTML = `<div style="color:#00ff88;">${expected} - Correct</div>`;
+    
+    
+    currentPoseIndex++;
+    window.globalPoseIndex = currentPoseIndex;  
+    if (currentPoseIndex >= suryaPoses.length) {
+  // Round completion logic
+  if (window.currentRound && window.currentRound <= window.totalRounds) {
+    setTimeout(() => {
+      currentPoseIndex = 0;
+      window.globalPoseIndex = 0;
+      window.currentPoseIndex = 0;
+      window.currentRound++;
+      updatePoseDisplay();
+    }, 1500);
+    return;
+  }
+}  
+    setTimeout(updatePoseDisplay, 800);
+  }
+};
+
 
     const startBtn = document.getElementById("startBtn");
     const stopBtn = document.getElementById("stopBtn");
     const skipBtn = document.getElementById("skipBtn");
 
     startBtn.addEventListener("click", () => {
-      currentPoseIndex = 0;
-      updatePoseDisplay();
-      document.getElementById("status-label").style.display = "none";
-      startBtn.disabled = true;
-      stopBtn.disabled = false;
-      skipBtn.disabled = false;
-      if (window.startDetection) window.startDetection();
-    });
+  const rounds = parseInt(prompt("Enter number of Surya Namaskar rounds (1-10):", "1"));
+  if (!rounds || rounds < 1 || rounds > 10) {
+    alert("Please enter a valid number between 1-10");
+    return;
+  }
+  
+  window.totalRounds = rounds;  // Global rounds counter
+  window.currentRound = 1;      // Current round
+  window.resetSuryaSession();
+  currentPoseIndex = 0;
+  window.globalPoseIndex = 0;
+  window.currentPoseIndex = 0;
+  updatePoseDisplay();
+  document.getElementById("status-label").style.display = "none";
+  startBtn.disabled = true;
+  stopBtn.disabled = false;
+  skipBtn.disabled = false;
+  if (window.startDetection) window.startDetection();
+});
+
+
 
     stopBtn.addEventListener("click", () => {
       if (window.stopDetection) window.stopDetection(true);
@@ -288,11 +361,24 @@
     });
 
     skipBtn.addEventListener("click", () => {
-      if (currentPoseIndex < suryaPoses.length - 1) {
-        currentPoseIndex++;
-        updatePoseDisplay();
-      }
-    });
+  if (currentPoseIndex < suryaPoses.length - 1) {
+    currentPoseIndex++;
+    window.globalPoseIndex = currentPoseIndex;
+    window.currentPoseIndex = currentPoseIndex;
+    updatePoseDisplay();
+  } else if (window.currentRound < window.totalRounds) {
+    // Complete current round, start next
+    currentPoseIndex = 0;
+    
+    window.globalPoseIndex = 0;
+    window.currentPoseIndex = 0;
+    window.currentRound++;
+    updatePoseDisplay();
+  }
+});
+
+
+    
 
     document.getElementById("toggleSkeleton").addEventListener("change", e => window.showSkeleton = e.target.checked);
     updatePoseDisplay();

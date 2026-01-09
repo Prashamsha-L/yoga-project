@@ -49,7 +49,7 @@ YogaAI is an AI-powered yoga posture detection and correction system designed to
 
 ### Project Execution
 1) Navigate to the main project directory
----
+
 `cd YogaAI_1`
 
 2) Login / Signup Backend (Node.js)

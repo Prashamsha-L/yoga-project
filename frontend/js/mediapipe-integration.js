@@ -32,8 +32,6 @@
   window.showSkeleton = true;
 
   
-
-
   function smoothAngles(newAngles) {
     angleHistory.push(newAngles);
     if (angleHistory.length > SMOOTH_FRAMES) angleHistory.shift();
@@ -285,14 +283,6 @@ canvasCtx.fillRect(
 canvasCtx.fillStyle = textColor;
 canvasCtx.fillText(text, canvasElement.width / 2, 30);
 
-
-
-     
-
-
-
-     
-    
     window.latestCorrections = {};
     canvasCtx.restore();
     return;

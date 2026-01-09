@@ -134,9 +134,6 @@ POSE_SYMMETRIC = {
         "left_hip": 60, "right_hip": 64
     },
 
-
-
-    
     "Phalakasana": {
         "left_elbow": 175, "right_elbow": 178,
         "left_shoulder": 60, "right_shoulder": 60,
@@ -150,10 +147,10 @@ POSE_SYMMETRIC = {
         "left_hip": 140, "right_hip": 142
     },
     "Svarga dvidasana": {
-        "left_elbow": 161, "right_elbow": 123,
-        "left_shoulder": 5, "right_shoulder": 45,
-        "left_knee": 175, "right_knee": 172,
-        "left_hip": 167, "right_hip": 49
+        "left_elbow": 161, "right_elbow": 120,
+        "left_shoulder": 15, "right_shoulder": 45,
+        "left_knee": 175, "right_knee": 150,
+        "left_hip": 167, "right_hip": 30
     },
     "Tadasana Samasthiti": {
         "left_elbow": 180, "right_elbow": 180,
@@ -174,10 +171,10 @@ POSE_SYMMETRIC = {
         "left_hip": 180, "right_hip": 180
     },
     "Tittibhasana": {
-        "left_elbow": 168, "right_elbow": 178,
-        "left_shoulder": 4, "right_shoulder": 17,
-        "left_knee": 168, "right_knee": 162,
-        "left_hip": 2, "right_hip": 12
+        "left_elbow": 168, "right_elbow": 175,
+        "left_shoulder": 18, "right_shoulder": 17,
+        "left_knee": 168, "right_knee": 170,
+        "left_hip": 10, "right_hip": 12
     },
     "Urdhva Dandasana": {
         "left_elbow": 64, "right_elbow": 64,
@@ -295,9 +292,9 @@ pose_asymmetric = {
     "Parivritta Trikonasana-Right": {"left_elbow": 175, "right_elbow": 175, "left_shoulder": 115, "right_shoulder": 105, "left_knee": 170, "right_knee": 170, "left_hip": 140, "right_hip": 45},
 
     # 16. Svarga Dvidasana (Bird of Paradise)-
-    "Svarga Dvidasana-Left":  {"left_elbow": 150, "right_elbow": 120, "left_shoulder": 2, "right_shoulder": 45, "left_knee": 172, "right_knee": 162, "left_hip": 165, "right_hip": 25},
+    "Svarga dvidasana-Left":  {"left_elbow": 150, "right_elbow": 120, "left_shoulder": 2, "right_shoulder": 45, "left_knee": 172, "right_knee": 162, "left_hip": 165, "right_hip": 25},
 
-    "Svarga Dvidasana-Right": {"left_elbow": 83, "right_elbow": 117, "left_shoulder": 34, "right_shoulder": 7, "left_knee": 170, "right_knee": 177, "left_hip": 24, "right_hip": 161},
+    "Svarga dvidasana-Right": {"left_elbow": 83, "right_elbow": 117, "left_shoulder": 34, "right_shoulder": 7, "left_knee": 170, "right_knee": 177, "left_hip": 24, "right_hip": 161},
 
     # 17. Uttana Shishosana * detection
     "Uttana Shishosana-Left":  {"left_elbow": 170, "right_elbow": 170, "left_shoulder": 145, "right_shoulder": 145, "left_knee": 95, "right_knee": 95, "left_hip": 73, "right_hip": 73},
@@ -756,7 +753,7 @@ POSE_FEEDBACK = {
     "left_hip": "Straighten left hip fully",
     "right_hip": "Straighten right hip fully"
 },
-"Svarga Dvidasana": {
+"Svarga dvidasana": {
     "left_elbow": "Bend left elbow slightly",
     "right_elbow": "Bend right elbow deeply",
     "left_shoulder": "Fold left shoulder inward",
