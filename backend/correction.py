@@ -297,9 +297,9 @@ pose_asymmetric = {
     "Svarga dvidasana-Right": {"left_elbow": 83, "right_elbow": 117, "left_shoulder": 34, "right_shoulder": 7, "left_knee": 170, "right_knee": 177, "left_hip": 24, "right_hip": 161},
 
     # 17. Uttana Shishosana * detection
-    "Uttana Shishosana-Left":  {"left_elbow": 170, "right_elbow": 170, "left_shoulder": 145, "right_shoulder": 145, "left_knee": 95, "right_knee": 95, "left_hip": 73, "right_hip": 73},
+    "Uttana shishosana-Left":  {"left_elbow": 170, "right_elbow": 170, "left_shoulder": 145, "right_shoulder": 145, "left_knee": 95, "right_knee": 95, "left_hip": 73, "right_hip": 73},
 
-    "Uttana Shishosana-Right": {"left_elbow": 165, "right_elbow": 165, "left_shoulder": 155, "right_shoulder": 150, "left_knee": 90, "right_knee": 90, "left_hip": 45, "right_hip": 45},
+    "Uttana shishosana-Right": {"left_elbow": 165, "right_elbow": 165, "left_shoulder": 155, "right_shoulder": 150, "left_knee": 90, "right_knee": 90, "left_hip": 45, "right_hip": 45},
 
     # 18. Utthita Parsvakonasana-
     "Utthita Parsvakonasana-Left":  {"left_elbow": 175, "right_elbow": 165, "left_shoulder": 60, "right_shoulder": 170, "left_knee": 90, "right_knee": 175, "left_hip": 25, "right_hip": 175},

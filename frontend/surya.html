@@ -1,11 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <title>Surya Namaskar Pose Detection</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+
   <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #000;
+      color: #fff;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .video-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    video, canvas {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    canvas { z-index: 2; }
+
+    #pose-container {
+      position: absolute;
+      top: 5%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: black;
+      padding: 30px 50px;
+      border-radius: 40px;
+      text-align: center;
+      z-index: 5;
+    }
+
+    #pose-label {
+      font-size: 32px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    #current-step {
+      font-size: 20px;
+      color: #ffd700;
+    }
+
+    /* Toggle Switch CSS */
     .switch {
       position: relative;
       display: inline-block;
@@ -28,6 +76,7 @@
       bottom: 0;
       background-color: #ccc;
       transition: 0.4s;
+      border-radius: 34px;
     }
 
     .slider:before {
@@ -39,109 +88,27 @@
       bottom: 4px;
       background-color: white;
       transition: 0.4s;
-    }
-
-    input:checked+.slider {
-      background-color: #4caf50;
-    }
-
-    input:checked+.slider:before {
-      transform: translateX(26px);
-    }
-
-    .slider.round {
-      border-radius: 34px;
-    }
-
-    .slider.round:before {
       border-radius: 50%;
     }
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #000;
-      color: #fff;
-      height: 100vh;
-      overflow: hidden;
+    input:checked + .slider {
+      background-color: #4CAF50;
     }
 
-    .video-container {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-      background: #000;
+    input:checked + .slider:before {
+      transform: translateX(26px);
     }
 
-    video#webcam {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      object-fit: cover;
-      z-index: 1;
-    }
-
-    canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 2;
-    }
-
+    /* Skeleton toggle container */
     #skeleton-toggle {
       position: absolute;
-      top: 10px;
+      top: 15px;
       right: 20px;
-      z-index: 9999;
+      z-index: 5;
       display: flex;
       align-items: center;
       gap: 10px;
-    }
-
-    #top-info {
-      position: absolute;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      text-align: center;
-      z-index: 5;
-    }
-
-    #status-label {
-      font-size: 20px;
       font-weight: bold;
-      color: #ff6b6b;
-    }
-
-    #pose-container {
-      position: absolute;
-      top: 30%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      z-index: 5;
-      background-color: black;
-      padding: 40px;
-      border-radius: 50px;
-    }
-
-    #pose-label {
-      font-size: 34px;
-      font-weight: bold;
-      margin-bottom: 10px;
-      color: #ffffff;
-      line-height: 1.2;
-    }
-
-    #current-step {
-      font-size: 22px;
-      font-weight: bold;
-      color: #ffd700;
-      margin-top: 4px;
     }
 
     .controls {
@@ -151,238 +118,138 @@
       transform: translateX(-50%);
       display: flex;
       gap: 12px;
-      align-items: center;
-      z-index: 3;
+      z-index: 5;
     }
 
     button {
       padding: 10px 18px;
       font-size: 15px;
+      font-weight: bold;
       border-radius: 8px;
       border: none;
       cursor: pointer;
-      font-weight: bold;
-      opacity: 0.95;
     }
+
+    #startBtn { background: #28a745; color: white; }
+    #stopBtn { background: #dc3545; color: white; }
+    #skipBtn { background: #ffc107; color: black; }
+    #backBtn { background: #007bff; color: white; }
 
     button:disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
-
-    #startBtn {
-      background-color: #28a745;
-      color: #fff;
-    }
-
-    #stopBtn {
-      background-color: #dc3545;
-      color: #fff;
-    }
-
-    #skipBtn {
-      background-color: #ffc107;
-      color: #000;
-    }
-
-    #backBtn {
-      background-color: #007bff;
-      color: #fff;
-    }
   </style>
 </head>
 
 <body>
-  <div class="video-container">
-    <div id="skeleton-toggle">
-      <label class="switch">
-        <input type="checkbox" id="toggleSkeleton" checked />
-        <span class="slider round"></span>
-      </label>
-      <span style="color:white; font-weight:bold;">Show Skeleton</span>
-    </div>
+<div class="video-container">
 
-    <video id="webcam" autoplay playsinline muted></video>
-    <canvas id="output_canvas"></canvas>
+  <video id="webcam" autoplay muted playsinline></video>
+  <canvas id="output_canvas"></canvas>
 
-    <div id="top-info">
-      <div id="status-label">Press Start to begin</div>
-    </div>
-    <div id="round-card" style="
-  position: absolute;
-  top: 60%;
-  left: 20px;
-  background: rgba(0,0,0,0.8);
-  padding: 15px 20px;
-  border-radius: 15px;
-  z-index: 5;
-  text-align: center;
-  min-width: 120px;
-  display: none;
-">
-  <div style="font-size: 18px; font-weight: bold; color: #ffd700; margin-bottom: 5px;">Round</div>
-  <div id="round-display" style="font-size: 24px; font-weight: bold; color: #fff;">1</div>
-  <div style="font-size: 14px; color: #ccc; margin-top: 8px;">Step</div>
-  <div id="step-display" style="font-size: 20px; font-weight: bold; color: #00ff88;">1/12</div>
-</div>
-
-
-    <div id="pose-container">
-      <div id="pose-label"></div>
-      <div id="current-step"></div>
-    </div>
-
-    <div class="controls">
-      <button id="startBtn">Start</button>
-      <button id="stopBtn" disabled>Stop</button>
-      <button id="skipBtn" disabled>Next Pose</button>
-      <button id="backBtn" onclick="window.location.href='home.html'">Back</button>
-    </div>
+  <!-- Pose Display -->
+  <div id="pose-container">
+    <div id="pose-label">Press Start</div>
+    <div id="current-step"></div>
   </div>
 
-  <!-- MediaPipe libs -->
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+  <!-- Skeleton toggle -->
+  <div id="skeleton-toggle">
+    <label class="switch">
+      <input type="checkbox" id="toggleSkeleton" checked>
+      <span class="slider"></span>
+    </label>
+    <span style="color: white;">Show Skeleton</span>
+  </div>
 
-  <script src="js/surya.js"></script>
+  <!-- Controls -->
+  <div class="controls">
+    <button id="startBtn">Start</button>
+    <button id="stopBtn" disabled>Stop</button>
+    <button id="skipBtn" disabled>Next Pose</button>
+    <button id="backBtn" onclick="location.href='home.html'">Back</button>
+  </div>
 
-  <script>
-    const suryaPoses = [
-      "Pranamasana", "Hasta Uttanasana", "Padahastasana",
-      "Ashwa Sanchalanasana", "Chaturanga Dandasana", "Ashtanga Namaskar",
-      "Bhujangasana", "Adho Mukha Svanasana", "Ashwa Sanchalanasana",
-      "Padahastasana", "Hasta Uttanasana", "Pranamasana"
-    ];
+</div>
 
-    let currentPoseIndex = 0;
+<!-- MediaPipe -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
 
-    function updatePoseDisplay() {
-      const label = document.getElementById("pose-label");
-      const stepEl = document.getElementById("current-step");
+<!-- Detection logic -->
+<script src="js/surya.js"></script>
 
-      // Only check rounds if session started
-if (!window.totalRounds || !window.currentRound) {
-  label.innerHTML = `<div>Upcoming Pose: <span style="color:#ffd700;">${suryaPoses[currentPoseIndex]}</span></div>`;
-  stepEl.textContent = `Pose ${currentPoseIndex + 1} of ${suryaPoses.length}`;
-} else if (currentPoseIndex >= suryaPoses.length && window.currentRound <= window.totalRounds) {
-  // End of round, start next round
-  label.innerHTML = `<div style="color:#00ff88;">Round ${window.currentRound - 1} Complete!</div>`;
-  stepEl.textContent = `Starting Round ${window.currentRound}`;
-  setTimeout(() => {
-    currentPoseIndex = 0;
-    window.globalPoseIndex = 0;
-    window.currentPoseIndex = 0;
-    updatePoseDisplay();
-  }, 1500);
-} else if (window.currentRound > window.totalRounds) {
-  label.innerHTML = `<div style="color:#00ff88;">All ${window.totalRounds} rounds completed!</div>`;
-  stepEl.textContent = "";
-  setTimeout(() => window.location.href = "surya_result.html", 2000);
-} else {
-  label.innerHTML = `<div>Upcoming Pose: <span style="color:#ffd700;">${suryaPoses[currentPoseIndex]}</span></div>`;
-  stepEl.textContent = `Pose ${currentPoseIndex + 1} of ${suryaPoses.length}`;
-}
+<script>
+  const suryaPoses = window.suryaPoses;
+  let totalRounds = 1;
+  let isDetectionRunning = false;
 
+  function updatePoseDisplay() {
+    const label = document.getElementById("pose-label");
+    const step = document.getElementById("current-step");
 
-        // Update round/step display
-  if (window.totalRounds && window.currentRound) {
-    document.getElementById("round-card").style.display = "block";
-    document.getElementById("round-display").textContent = window.currentRound;
-    document.getElementById("step-display").textContent = `${currentPoseIndex + 1}/12`;
-  } else {
-  document.getElementById("round-card").style.display = "none";
-}
-
+    if (window.currentPoseIndex < suryaPoses.length) {
+      label.innerHTML =
+        `Upcoming Pose: <span style="color:#ffd700">${suryaPoses[window.currentPoseIndex]}</span>`;
+      step.textContent =
+        `Round ${window.currentRound}, Pose ${window.currentPoseIndex + 1} of ${suryaPoses.length}`;
+    } else {
+      label.innerHTML = `<span style="color:#00ff88">Session Completed</span>`;
+      step.textContent = "";
     }
-    window.globalPoseIndex = 0; 
-    // Detection callback
-    window.onSuryaDetected = function (detectedPose, meta) {
-  if (!detectedPose) return;
-
-  const expected = suryaPoses[currentPoseIndex];
-  const label = document.getElementById("pose-label");
-
-  if (detectedPose.toLowerCase() === expected.toLowerCase()) {
-    label.innerHTML = `<div style="color:#00ff88;">${expected} - Correct</div>`;
-    
-    
-    currentPoseIndex++;
-    window.globalPoseIndex = currentPoseIndex;  
-    if (currentPoseIndex >= suryaPoses.length) {
-  // Round completion logic
-  if (window.currentRound && window.currentRound <= window.totalRounds) {
-    setTimeout(() => {
-      currentPoseIndex = 0;
-      window.globalPoseIndex = 0;
-      window.currentPoseIndex = 0;
-      window.currentRound++;
-      updatePoseDisplay();
-    }, 1500);
-    return;
   }
-}  
-    setTimeout(updatePoseDisplay, 800);
-  }
-};
 
+  window.onSuryaDetected = function (detectedPose, meta) {
+    if (!isDetectionRunning || !detectedPose || window.currentPoseIndex >= suryaPoses.length) return;
 
-    const startBtn = document.getElementById("startBtn");
-    const stopBtn = document.getElementById("stopBtn");
-    const skipBtn = document.getElementById("skipBtn");
+    const expected = suryaPoses[window.currentPoseIndex];
+    if (detectedPose.toLowerCase() === expected.toLowerCase()) {
+      document.getElementById("pose-label").innerHTML =
+        `<span style="color:#00ff88">${expected} - Correct</span>`;
+    }
+  };
 
-    startBtn.addEventListener("click", () => {
-  const rounds = parseInt(prompt("Enter number of Surya Namaskar rounds (1-10):", "1"));
-  if (!rounds || rounds < 1 || rounds > 10) {
-    alert("Please enter a valid number between 1-10");
-    return;
-  }
-  
-  window.totalRounds = rounds;  // Global rounds counter
-  window.currentRound = 1;      // Current round
-  window.resetSuryaSession();
-  currentPoseIndex = 0;
-  window.globalPoseIndex = 0;
-  window.currentPoseIndex = 0;
-  updatePoseDisplay();
-  document.getElementById("status-label").style.display = "none";
-  startBtn.disabled = true;
-  stopBtn.disabled = false;
-  skipBtn.disabled = false;
-  if (window.startDetection) window.startDetection();
-});
+  document.getElementById("startBtn").onclick = () => {
+    const roundsInputValue = prompt("Enter number of rounds for Surya Namaskar:", "1");
+    totalRounds = parseInt(roundsInputValue, 10) || 1;
+    localStorage.setItem("suryaRounds", totalRounds);
 
-
-
-    stopBtn.addEventListener("click", () => {
-      if (window.stopDetection) window.stopDetection(true);
-      setTimeout(() => window.location.href = "surya_result.html", 500);
-    });
-
-    skipBtn.addEventListener("click", () => {
-  if (currentPoseIndex < suryaPoses.length - 1) {
-    currentPoseIndex++;
-    window.globalPoseIndex = currentPoseIndex;
-    window.currentPoseIndex = currentPoseIndex;
-    updatePoseDisplay();
-  } else if (window.currentRound < window.totalRounds) {
-    // Complete current round, start next
-    currentPoseIndex = 0;
-    
-    window.globalPoseIndex = 0;
     window.currentPoseIndex = 0;
-    window.currentRound++;
+    window.currentRound = 1;
     updatePoseDisplay();
-  }
-});
 
+    window.resetSuryaSession();
+    window.startDetection();
 
-    
+    isDetectionRunning = true;
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+    skipBtn.disabled = false;
+  };
 
-    document.getElementById("toggleSkeleton").addEventListener("change", e => window.showSkeleton = e.target.checked);
-    updatePoseDisplay();
-  </script>
+  document.getElementById("stopBtn").onclick = () => {
+    isDetectionRunning = false;
+    window.stopDetection(true);
+  };
+
+  document.getElementById("skipBtn").onclick = () => {
+    if (!isDetectionRunning) return;
+
+    if (window.currentPoseIndex < suryaPoses.length - 1) {
+      window.currentPoseIndex++;
+      updatePoseDisplay();
+    } else {
+      if (window.advancePose) window.advancePose();
+    }
+  };
+
+  document.getElementById("toggleSkeleton").onchange = e => {
+    window.showSkeleton = e.target.checked;
+  };
+
+  updatePoseDisplay();
+</script>
 </body>
-
 </html>

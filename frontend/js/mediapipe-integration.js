@@ -16,14 +16,16 @@
   // stability + smoothing state
   let prevAngles = null;
   let stagnantCount = 0;
-  const STAGNANT_THRESHOLD = 15; 
-  const TOLERANCE = 8;           
-  const SMOOTH_FRAMES = 5;      
+  const STAGNANT_THRESHOLD = 8; 
+  const TOLERANCE = 12;           
+  const SMOOTH_FRAMES = 3;      
   let angleHistory = [];
   let lastSentTime = 0;
-  const SEND_COOLDOWN = 1200;
+  const SEND_COOLDOWN = 1000;
 
   let isSending = false;
+  let isSpeaking = false;
+let currentUtterance = null;
 
   let poseHistory = [];
   const POSE_WINDOW = 15;  
@@ -140,23 +142,23 @@
 
             if (poseName && poseName !== "No Pose Detected") {
         // Capture thumbnail image from canvas (safe fallback if id differs)
-        let canvasEl = document.getElementById('output_canvas');
-        let imgData = null;
-        try {
-          if (canvasEl) {
-            // use smaller thumbnail size for storage by drawing into an offscreen canvas
-            const thumbW = 320; // thumbnail width
-            const thumbH = Math.round((canvasEl.height / canvasEl.width) * thumbW);
-            const off = document.createElement('canvas');
-            off.width = thumbW;
-            off.height = thumbH;
-            const offCtx = off.getContext('2d');
-            offCtx.drawImage(canvasEl, 0, 0, canvasEl.width, canvasEl.height, 0, 0, thumbW, thumbH);
-            imgData = off.toDataURL('image/png');
-          }
-        } catch (e) {
-          console.warn('Could not capture image:', e);
-        }
+        // let canvasEl = document.getElementById('output_canvas');
+        // let imgData = null;
+        // try {
+        //   if (canvasEl) {
+        //     // use smaller thumbnail size for storage by drawing into an offscreen canvas
+        //     const thumbW = 320; // thumbnail width
+        //     const thumbH = Math.round((canvasEl.height / canvasEl.width) * thumbW);
+        //     const off = document.createElement('canvas');
+        //     off.width = thumbW;
+        //     off.height = thumbH;
+        //     const offCtx = off.getContext('2d');
+        //     offCtx.drawImage(canvasEl, 0, 0, canvasEl.width, canvasEl.height, 0, 0, thumbW, thumbH);
+        //     imgData = off.toDataURL('image/png');
+        //   }
+        // } catch (e) {
+        //   console.warn('Could not capture image:', e);
+        // }
 
         
         // ensure sessionResults is an object of arrays
@@ -171,11 +173,7 @@
             const frameAccuracy = (correct / joints.length) * 100;
 
             // push object with accuracy + image + timestamp
-            sessionResults[poseName].push({
-              accuracy: frameAccuracy,
-              image: imgData,
-              ts: Date.now()
-            });
+            sessionResults[poseName].push(frameAccuracy);
           }
         }
 
@@ -213,10 +211,10 @@
       locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
     });
     pose.setOptions({
-      modelComplexity: 1,
-      smoothLandmarks: true,
-      minDetectionConfidence: 0.5,
-      minTrackingConfidence: 0.5
+      modelComplexity: 0,
+      smoothLandmarks: false,
+      minDetectionConfidence: 0.3,
+      minTrackingConfidence: 0.3
     });
     function isFullBodyVisible(landmarks) {
     const criticalJoints = [11, 12, 13, 14, 23, 24, 25, 26]; 

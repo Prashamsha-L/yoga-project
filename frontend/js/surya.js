@@ -1,26 +1,28 @@
 (() => {
   const ID = {
-    LEFT_SHOULDER:11, RIGHT_SHOULDER:12,
-    LEFT_ELBOW:13, RIGHT_ELBOW:14,
-    LEFT_WRIST:15, RIGHT_WRIST:16,
-    LEFT_HIP:23, RIGHT_HIP:24,
-    LEFT_KNEE:25, RIGHT_KNEE:26,
-    LEFT_ANKLE:27, RIGHT_ANKLE:28
+    LEFT_SHOULDER: 11, RIGHT_SHOULDER: 12,
+    LEFT_ELBOW: 13, RIGHT_ELBOW: 14,
+    LEFT_WRIST: 15, RIGHT_WRIST: 16,
+    LEFT_HIP: 23, RIGHT_HIP: 24,
+    LEFT_KNEE: 25, RIGHT_KNEE: 26,
+    LEFT_ANKLE: 27, RIGHT_ANKLE: 28
   };
 
   const MODEL_ENDPOINT = "http://127.0.0.1:8002/predict_surya";
-  const SMOOTH_FRAMES = 5;
-  const STAGNANT_THRESHOLD = 12;
+  const SMOOTH_FRAMES = 2;
+  const STAGNANT_THRESHOLD = 8;
   const TOLERANCE = 8;
   const POSE_HOLD_THRESHOLD = 2;
-  const MIN_POSE_COUNT = 12;
+  const MIN_ACCURACY = 50; // Must be ≥60% to advance
 
   window.suryaPoses = [
-    "Pranamasana","Hasta Uttanasana","Padahastasana",
-    "Ashwa Sanchalanasana","Chaturanga Dandasana","Ashtanga Namaskar",
-    "Bhujangasana","Adho Mukha Svanasana","Ashwa Sanchalanasana",
-    "Padahastasana","Hasta Uttanasana","Pranamasana"
+    "Pranamasana", "Hasta Uttanasana", "Padahastasana",
+    "Ashwa Sanchalanasana", "Chaturanga Dandasana", "Ashtanga Namaskar",
+    "Bhujangasana", "Adho Mukha Svanasana", "Ashwa Sanchalanasana",
+    "Padahastasana", "Hasta Uttanasana", "Pranamasana"
   ];
+
+  const MIN_POSE_COUNT = window.suryaPoses.length;
 
   let camera, pose;
   let isRunning = false;
@@ -33,8 +35,10 @@
   window.showSkeleton = true;
   window.latestCorrections = {};
   window.currentPoseIndex = 0;
-  window.currentDetectedPose = "";
+  window.currentRound = 1;
+  window.currentDetectedPose = "Waiting...";
   window.currentPoseAccuracy = 0;
+
   let sessionResults;
 
   function speak(text, isSuggestion = false) {
@@ -52,37 +56,44 @@
   }
 
   function calculateAccuracyFromCorrections(corrections) {
-    if (!corrections || Object.keys(corrections).length === 0) return 50;
-    const totalJoints = Object.keys(corrections).length;
-    const greenJoints = Object.values(corrections).filter(c => c === 'green').length;
-    return Math.round((greenJoints / totalJoints) * 100);
+    if (!corrections || Object.keys(corrections).length === 0) return 0;
+    let total = 0;
+    let green = 0;
+    Object.values(corrections).forEach(status => {
+      if (status === 'green' || status === 'red') {
+        total++;
+        if (status === 'green') green++;
+      }
+    });
+    if (total === 0) return 0;
+    return Math.round((green / total) * 100);
   }
 
   function initEmptySession() {
-  const stepsPerRound = window.suryaPoses.length;
-  const totalSteps = (window.totalRounds || 1) * stepsPerRound;
-  
-  return {
-    steps: Array(totalSteps).fill().map((_, i) => {
-      const round = Math.floor(i / stepsPerRound) + 1;
-      const poseIndex = i % stepsPerRound;
-      return {
-        index: i + 1,
-        round: round,
-        expected: window.suryaPoses[poseIndex],
-        detected: "Not performed",
-        accuracy: 0,
-        corrections: {},
-        timestamp: null,
-        roundSamples: []
-      };
-    }),
-    totalRounds: window.totalRounds || 1,
-    sessionDate: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
-    overallAccuracy: 0
-  };
-}
-
+    const rounds = parseInt(localStorage.getItem("suryaRounds") || "1", 10);
+    const steps = [];
+    for (let round = 1; round <= rounds; round++) {
+      for (let i = 0; i < window.suryaPoses.length; i++) {
+        steps.push({
+          round: round,
+          index: i + 1,
+          expected: window.suryaPoses[i],
+          detected: "Not performed",
+          accuracy: 0,
+          corrections: {},
+          feedback: "",
+          timestamp: null,
+          roundSamples: []
+        });
+      }
+    }
+    return {
+      steps: steps,
+      sessionDate: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+      overallAccuracy: 0,
+      rounds: rounds
+    };
+  }
 
   function saveSession() {
     localStorage.setItem("suryaSessionFull", JSON.stringify(sessionResults));
@@ -92,6 +103,9 @@
     sessionResults = initEmptySession();
     saveSession();
     window.currentPoseIndex = 0;
+    window.currentRound = 1;
+    window.currentDetectedPose = "Waiting...";
+    window.currentPoseAccuracy = 0;
   };
 
   function loadSession() {
@@ -103,7 +117,7 @@
     }
     try {
       const parsed = JSON.parse(raw);
-      if (!parsed.steps || !window.totalRounds || parsed.steps.length !== (window.totalRounds * MIN_POSE_COUNT)) {
+      if (!parsed.steps || parsed.steps.length === 0) {
         sessionResults = initEmptySession();
       } else {
         sessionResults = parsed;
@@ -116,7 +130,8 @@
 
   loadSession();
 
-  function updatePoseAverage(idx) {
+  function updatePoseAverage(round, poseIndex) {
+    const idx = (round - 1) * MIN_POSE_COUNT + (poseIndex - 1);
     const samples = sessionResults.steps[idx].roundSamples;
     if (samples.length > 0) {
       sessionResults.steps[idx].accuracy = Math.round(
@@ -125,84 +140,158 @@
     }
   }
 
-  function recordPoseAttempt(accuracy, corrections, detected = "Attempted") {
-  // Calculate correct index: (currentRound-1) * 12 + currentPoseIndex
-  const roundOffset = ((window.currentRound || 1) - 1) * MIN_POSE_COUNT;
-  const poseIndex = window.currentPoseIndex || window.globalPoseIndex || 0;
-  const idx = roundOffset + poseIndex;
-  
-  const totalSteps = (window.totalRounds || 1) * MIN_POSE_COUNT;
-  if (idx >= totalSteps) return false;
+  function recordPoseAttempt(accuracy, corrections, detected = "Attempted", feedback = "") {
+    const round = window.currentRound;
+    const poseIndex = window.currentPoseIndex + 1;
+    const idx = (round - 1) * MIN_POSE_COUNT + (poseIndex - 1);
 
-  const finalAccuracy = calculateAccuracyFromCorrections(corrections);
-  
-  sessionResults.steps[idx].roundSamples.push({
-    accuracy: finalAccuracy,
-    corrections: corrections,
-    detected: detected,
-    timestamp: Date.now()
-  });
+    if (idx >= sessionResults.steps.length) return false;
 
-  updatePoseAverage(idx);
-  sessionResults.steps[idx].detected = detected;
-  sessionResults.steps[idx].corrections = corrections;
-  sessionResults.steps[idx].timestamp = Date.now();
+    // Only record if accuracy is meaningful (≥30%)
+    if (accuracy >= 30) {
+      sessionResults.steps[idx].roundSamples.push({
+        accuracy: accuracy,
+        corrections: corrections,
+        detected: detected,
+        feedback: feedback,
+        timestamp: Date.now()
+      });
 
-  saveSession();
-  return true;
-}
+      updatePoseAverage(round, poseIndex);
+      sessionResults.steps[idx].detected = detected;
+      sessionResults.steps[idx].corrections = corrections;
+      sessionResults.steps[idx].feedback = feedback;
+      sessionResults.steps[idx].timestamp = Date.now();
+      saveSession();
+    }
 
+    return true;
+  }
 
   async function sendSuryaAngles(angles) {
-  try {
-    const res = await fetch(MODEL_ENDPOINT, { 
-      method: 'POST', 
-      headers: {'Content-Type': 'application/json'}, 
-      body: JSON.stringify({ angles }) 
-    });
-    if (!res.ok) throw new Error('Model HTTP ' + res.status);
-    
-    const data = await res.json();
-    const detectedPose = (data.pose || 'No Pose').trim();
-    window.currentDetectedPose = detectedPose;
-    window.latestCorrections = data.corrections || {};
-    
-    const accuracy = calculateAccuracyFromCorrections(data.corrections);
-    window.currentPoseAccuracy = accuracy;
+    try {
+      const res = await fetch(MODEL_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ angles })
+      });
+      if (!res.ok) throw new Error('Model HTTP ' + res.status);
 
-    recordPoseAttempt(accuracy, data.corrections);  // Records using globalPoseIndex
+      const data = await res.json();
+      const detectedPose = (data.pose || 'No Pose').trim();
+      window.currentDetectedPose = detectedPose;
+      window.latestCorrections = data.corrections || {};
 
-    if (window.onSuryaDetected) 
-      window.onSuryaDetected(detectedPose, { accuracy: window.currentPoseAccuracy });
+      const accuracy = calculateAccuracyFromCorrections(data.corrections);
+      window.currentPoseAccuracy = accuracy;
 
-  } catch(e) {
-    recordPoseAttempt(0, {}, "Error");
-    if (window.onSuryaDetected) window.onSuryaDetected('No Pose', { accuracy: 0 });
+      // Only record if accuracy is decent (≥30%)
+      if (accuracy >= 30) {
+        recordPoseAttempt(accuracy, data.corrections, detectedPose, data.feedback || "");
+      }
+
+      const expectedPose = window.suryaPoses[window.currentPoseIndex];
+
+      // Only advance if:
+      // - Detected pose matches expected pose
+      // - Accuracy is good (≥60%)
+      // - Pose is held for multiple stable frames
+      if (
+        detectedPose.toLowerCase() === expectedPose.toLowerCase() &&
+        accuracy >= MIN_ACCURACY
+      ) {
+        holdMatchCount++;
+        if (holdMatchCount >= POSE_HOLD_THRESHOLD) {
+          holdMatchCount = 0;
+          if (window.currentPoseIndex < window.suryaPoses.length - 1) {
+            speak(`Good! Now do ${window.suryaPoses[window.currentPoseIndex + 1]}`);
+          } else {
+            speak("Good! Round complete!");
+          }
+          advancePose();
+          return;
+        }
+      } else {
+        holdMatchCount = 0;
+      }
+
+      // Update UI only if accuracy is meaningful
+      if (window.onSuryaDetected && accuracy >= 30) {
+        window.onSuryaDetected(detectedPose, { accuracy: window.currentPoseAccuracy });
+      } else if (window.onSuryaDetected) {
+        window.onSuryaDetected('No Pose', { accuracy: 0 });
+      }
+
+    } catch (e) {
+      console.error("Pose detection error:", e);
+      window.currentDetectedPose = "Error";
+      window.currentPoseAccuracy = 0;
+      if (window.onSuryaDetected) {
+        window.onSuryaDetected('No Pose', { accuracy: 0 });
+      }
+    }
   }
-}
 
+  function advancePose() {
+    const posesPerRound = window.suryaPoses.length;
+    const totalRounds = sessionResults.rounds;
 
-  // function advancePose() {
-    
-  //   if (window.currentPoseIndex < MIN_POSE_COUNT - 1) {
-  //     window.currentPoseIndex++;
-  //   } else {
-  //     speak("Well done! All poses completed!");
-  //     stopDetection(true);
-  //   }
-  //   saveSession();
-  // }
+    window.currentPoseIndex++;
 
-  function angleABC(A,B,C){ 
-    if(!A||!B||!C) return 0; 
-    const BAx=A.x-B.x, BAy=A.y-B.y; 
-    const BCx=C.x-B.x, BCy=C.y-B.y; 
-    const dot=BAx*BCx+BAy*BCy; 
-    const magBA=Math.hypot(BAx,BAy); 
-    const magBC=Math.hypot(BCx,BCy); 
-    if(magBA===0||magBC===0) return 0; 
-    const cos=Math.max(-1,Math.min(1,dot/(magBA*magBC))); 
-    return Math.acos(cos)*(180/Math.PI); 
+    if (window.currentPoseIndex >= posesPerRound) {
+      if (window.currentRound < totalRounds) {
+        window.currentRound++;
+        window.currentPoseIndex = 0;
+        speak(`Round ${window.currentRound} starting. Do Pranamasana`);
+      } else {
+        if (window.onSuryaDetected) {
+          window.onSuryaDetected('All rounds completed', { accuracy: 100 });
+        }
+        speak("Excellent! All rounds completed!");
+        stopDetection(true);
+        return;
+      }
+    }
+
+    // Reset counters and state for next pose
+    holdMatchCount = 0;
+    window.currentDetectedPose = "Waiting...";
+    window.currentPoseAccuracy = 0;
+    window.latestCorrections = {};
+
+    saveSession();
+
+    if (window.updatePoseDisplay) window.updatePoseDisplay();
+  }
+
+  function stopDetection(redirect = true) {
+    isRunning = false;
+
+    const validSteps = sessionResults.steps.filter(s => s.roundSamples.length > 0);
+    const overall = validSteps.length
+      ? Math.round(validSteps.reduce((sum, step) => sum + step.accuracy, 0) / validSteps.length)
+      : 0;
+
+    sessionResults.overallAccuracy = overall;
+    saveSession();
+
+    if (redirect) {
+      setTimeout(() => window.location.href = 'surya_result.html', 1500);
+    }
+  }
+
+  window.stopDetection = stopDetection;
+
+  function angleABC(A, B, C) {
+    if (!A || !B || !C) return 0;
+    const BAx = A.x - B.x, BAy = A.y - B.y;
+    const BCx = C.x - B.x, BCy = C.y - B.y;
+    const dot = BAx * BCx + BAy * BCy;
+    const magBA = Math.hypot(BAx, BAy);
+    const magBC = Math.hypot(BCx, BCy);
+    if (magBA === 0 || magBC === 0) return 0;
+    const cos = Math.max(-1, Math.min(1, dot / (magBA * magBC)));
+    return Math.acos(cos) * (180 / Math.PI);
   }
 
   function buildAngleVector(lm) {
@@ -235,31 +324,36 @@
     const video = document.getElementById('webcam');
     const canvas = document.getElementById('output_canvas');
     const ctx = canvas.getContext('2d');
-    canvas.width = 1280; canvas.height = 720;
+    canvas.width = 1280;
+    canvas.height = 720;
 
-    pose = new window.Pose({ 
-      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}` 
+    pose = new window.Pose({
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
     });
-    pose.setOptions({ 
-      modelComplexity: 1, 
-      smoothLandmarks: true, 
-      enableSegmentation: false, 
-      minDetectionConfidence: 0.5, 
-      minTrackingConfidence: 0.5 
+    pose.setOptions({
+      modelComplexity: 1,
+      smoothLandmarks: true,
+      enableSegmentation: false,
+      minDetectionConfidence: 0.5,
+      minTrackingConfidence: 0.5
     });
 
     pose.onResults((results) => {
-      ctx.save(); 
-      ctx.clearRect(0, 0, canvas.width, canvas.height); 
+      ctx.save();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
-      
-      if (!results.poseLandmarks) { ctx.restore(); return; }
+
+      if (!results.poseLandmarks) {
+        ctx.restore();
+        return;
+      }
 
       if (window.showSkeleton) {
         window.drawConnectors(ctx, results.poseLandmarks, window.POSE_CONNECTIONS, { color: '#ffffff', lineWidth: 3 });
       }
 
       const angles = smoothAngles(buildAngleVector(results.poseLandmarks));
+
       if (prevAngles) {
         const stable = angles.every((a, i) => Math.abs(a - prevAngles[i]) <= TOLERANCE);
         stagnantCount = stable ? stagnantCount + 1 : 0;
@@ -272,57 +366,51 @@
       }
 
       const corrections = window.latestCorrections || {};
-      const joints = { left_elbow:13, right_elbow:14, left_shoulder:11, right_shoulder:12, left_knee:25, right_knee:26, left_hip:23, right_hip:24 };
+      const joints = {
+        left_elbow: 13, right_elbow: 14,
+        left_shoulder: 11, right_shoulder: 12,
+        left_knee: 25, right_knee: 26,
+        left_hip: 23, right_hip: 24
+      };
       Object.entries(joints).forEach(([name, id]) => {
-        const lm = results.poseLandmarks[id]; 
-        if (!lm) return; 
-        ctx.beginPath(); 
-        ctx.arc(lm.x * canvas.width, lm.y * canvas.height, 4, 0, Math.PI * 2);
-        const color = corrections[name] === 'green' ? '#00ff00' : (corrections[name] === 'red' ? '#ff0000' : '#888');
+        const lm = results.poseLandmarks[id];
+        if (!lm) return;
+        ctx.beginPath();
+        ctx.arc(lm.x * canvas.width, lm.y * canvas.height, 6, 0, Math.PI * 2);
+        const color = corrections[name] === 'green' ? '#00ff00' : (corrections[name] === 'red' ? '#ff0000' : '#ffcc00');
         ctx.fillStyle = color;
         ctx.fill();
         ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 2;
         ctx.stroke();
       });
 
       ctx.restore();
     });
 
-    camera = new window.Camera(video, { 
-      onFrame: async () => { if (isRunning) await pose.send({ image: video }); }, 
-      width: 640, height: 480 
+    camera = new window.Camera(video, {
+      onFrame: async () => { if (isRunning) await pose.send({ image: video }); },
+      width: 640,
+      height: 480
     });
   }
 
   window.startDetection = () => {
     if (!isRunning) {
-      isRunning = true; 
-      angleHistory = []; 
-      prevAngles = null; 
-      stagnantCount = 0; 
-      holdMatchCount = 0; 
+      isRunning = true;
+      angleHistory = [];
+      prevAngles = null;
+      stagnantCount = 0;
+      holdMatchCount = 0;
       lastSuggestionTime = 0;
-      camera.start(); 
-      speak("Start Surya Namaskar session");
+      window.currentDetectedPose = "Waiting...";
+      window.currentPoseAccuracy = 0;
+      window.latestCorrections = {};
+
+      camera.start();
+      speak(`Start Surya Namaskar session. Round ${window.currentRound}. Do ${window.suryaPoses[window.currentPoseIndex]}`);
     }
   };
-
-  function stopDetection(redirect = true) {
-    isRunning = false;
-
-    const validSteps = sessionResults.steps.filter(s => s.roundSamples.length > 0);
-    const overall = validSteps.length > 0 
-      ? Math.round(validSteps.reduce((s, step) => s + step.accuracy, 0) / validSteps.length)
-      : 0;
-    
-    sessionResults.overallAccuracy = overall;
-    saveSession();
-
-    if (redirect) setTimeout(() => window.location.href = 'surya_result.html', 1000);
-  }
-
-  window.stopDetection = stopDetection;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initMediaPipe);
@@ -330,6 +418,3 @@
     initMediaPipe();
   }
 })();
-
-
-
