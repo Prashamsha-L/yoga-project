@@ -240,19 +240,5 @@ async def predict_surya(request: Request):
     except Exception as e:
         return JSONResponse({"pose": f"Error: {str(e)}", "confidence": 0.0})
     
-# @app.post("/save_pose_image")
-# async def save_pose_image(image: UploadFile = File(...), pose: str = Form(...)):
-#     # Ensure the folder exists
-#     os.makedirs("static/poses", exist_ok=True)
 
-#     # Save the image with the pose name (overwrite if already exists)
-#     filename = f"{pose}.jpg"  # one image per pose
-#     path = os.path.join("static/poses", filename)
-
-#     # Write file
-#     with open(path, "wb") as f:
-#         f.write(await image.read())
-
-#     # Return the filename to frontend
-#     return {"image": filename}
 

@@ -13,7 +13,7 @@
   const STAGNANT_THRESHOLD = 8;
   const TOLERANCE = 8;
   const POSE_HOLD_THRESHOLD = 2;
-  const MIN_ACCURACY = 50; // Must be ≥60% to advance
+  const MIN_ACCURACY = 50; 
 
   window.suryaPoses = [
     "Pranamasana", "Hasta Uttanasana", "Padahastasana",
@@ -147,7 +147,7 @@
 
     if (idx >= sessionResults.steps.length) return false;
 
-    // Only record if accuracy is meaningful (≥30%)
+    
     if (accuracy >= 30) {
       sessionResults.steps[idx].roundSamples.push({
         accuracy: accuracy,
@@ -191,11 +191,6 @@
       }
 
       const expectedPose = window.suryaPoses[window.currentPoseIndex];
-
-      // Only advance if:
-      // - Detected pose matches expected pose
-      // - Accuracy is good (≥60%)
-      // - Pose is held for multiple stable frames
       if (
         detectedPose.toLowerCase() === expectedPose.toLowerCase() &&
         accuracy >= MIN_ACCURACY

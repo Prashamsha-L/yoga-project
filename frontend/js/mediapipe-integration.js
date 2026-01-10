@@ -1,4 +1,3 @@
-// mediapipe-integration.js
 (() => {
   const ID = {
     LEFT_SHOULDER: 11, RIGHT_SHOULDER: 12,
@@ -81,13 +80,6 @@ let currentUtterance = null;
     isSending = true;
 
     try {
-      // const levelSelectEl = document.getElementById("levelSelect");
-      // const selectedLevel = levelSelectEl ? levelSelectEl.value : "beginner";
-
-      // console.log("Sending angles:", angles, "Level:", selectedLevel);
-
-
-      // console.log("Angles -> backend:", angles, "Level:", selectedLevel);
       const res = await fetch("http://127.0.0.1:8002/predict_pose", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -141,27 +133,7 @@ let currentUtterance = null;
       labelEl.style.fontSize = "30px";
 
             if (poseName && poseName !== "No Pose Detected") {
-        // Capture thumbnail image from canvas (safe fallback if id differs)
-        // let canvasEl = document.getElementById('output_canvas');
-        // let imgData = null;
-        // try {
-        //   if (canvasEl) {
-        //     // use smaller thumbnail size for storage by drawing into an offscreen canvas
-        //     const thumbW = 320; // thumbnail width
-        //     const thumbH = Math.round((canvasEl.height / canvasEl.width) * thumbW);
-        //     const off = document.createElement('canvas');
-        //     off.width = thumbW;
-        //     off.height = thumbH;
-        //     const offCtx = off.getContext('2d');
-        //     offCtx.drawImage(canvasEl, 0, 0, canvasEl.width, canvasEl.height, 0, 0, thumbW, thumbH);
-        //     imgData = off.toDataURL('image/png');
-        //   }
-        // } catch (e) {
-        //   console.warn('Could not capture image:', e);
-        // }
-
-        
-        // ensure sessionResults is an object of arrays
+     
         let sessionResults = JSON.parse(sessionStorage.getItem("sessionResults") || "{}");
         if (!sessionResults[poseName]) sessionResults[poseName] = [];
 
